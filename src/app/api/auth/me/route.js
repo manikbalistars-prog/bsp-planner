@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 
 export async function GET() {
   try {
-    const token = cookies().get("session")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("session")?.value;
 
     if (!token) {
       return NextResponse.json(
@@ -14,6 +15,8 @@ export async function GET() {
     }
 
     const user = jwt.verify(token, process.env.JWT_SECRET);
+
+    console.log(user)
 
     return NextResponse.json({
       user,

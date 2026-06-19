@@ -1,27 +1,74 @@
-import InputForm from "../ui/InputForm"
-import Button from "../ui/Button"
-import Link from "next/link"
+"use client";
+
+import InputForm from "../ui/InputForm";
+import Button from "../ui/Button";
+import Link from "next/link";
+import { useState } from "react";
+import { useLogin } from "@/hooks/useLogin";
+
 export default function LoginForm() {
-    return (
-        <div className="flex flex-col gap-2 w-full">
-            <InputForm
-                label="Username"
-                name="username"
-                type="text"
-                placeholder="input username here!" required={true} />
+  const { login, loading } = useLogin();
 
-            <InputForm
-                label="Password"
-                name="password"
-                type="password"
-                placeholder="input password here!" required={true} />
+  const [form, setForm] = useState({
+    username: "",
+    password: "",
+  });
 
-            {/* <div className="self-end"><Link href="#" className="text-sm text-blue-500">Forgot Password?</Link></div> */}
+  const handleChange = (e) => {
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
-<div className="pt-2"></div>
-            <Button label={"Login"} id={"login"} variant="primary"/>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-           <div className="pt-2 w-full flex justify-center"> <Link className="text-sm text-center text-stone-600" href="https://wa.me/6287848905327?text=hi,%20i%20need%20BSP%20planner%20account" target="_blank">Don't Have An Account?</Link></div>
-        </div>
-    )
+    try {
+      await login(form);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  return (
+    <form className="flex flex-col gap-2 w-full" onSubmit={handleSubmit}>
+      <InputForm
+        label="Username"
+        name="username"
+        type="text"
+        placeholder="Input username here!"
+        value={form.username}
+        onChange={handleChange}
+        required
+      />
+
+      <InputForm
+        label="Password"
+        name="password"
+        type="password"
+        placeholder="Input password here!"
+        value={form.password}
+        onChange={handleChange}
+        required
+      />
+
+      <Button
+        label={loading ? "Loading..." : "Login"}
+        id="login"
+        variant="primary"
+        type="submit"
+      />
+
+      <div className="pt-2 w-full flex justify-center">
+        <Link
+          className="text-sm text-center text-stone-600"
+          href="https://wa.me/6287848905327?text=hi,%20i%20need%20BSP%20planner%20account"
+          target="_blank"
+        >
+          Don't Have An Account?
+        </Link>
+      </div>
+    </form>
+  );
 }

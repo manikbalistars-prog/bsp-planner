@@ -55,13 +55,18 @@ export default function LoginForm() {
         required
       />
 
+      <div className="pt-3"></div>
+
+
       <Button
         label={loading ? "Loading..." : "Login"}
         id="login"
-        variant="primary"
+        variant={loading ? "disable" : "primary"}
         type="submit"
-        disabled={loading} // Bagus untuk mencegah double-submit saat loading
+        disabled={loading}
       />
+
+
 
       <div className="pt-2 w-full flex justify-center">
         <Link

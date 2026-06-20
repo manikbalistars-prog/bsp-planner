@@ -20,15 +20,13 @@ export async function middleware(req) {
       secret
     );
 
-    if (
-      req.nextUrl.pathname.startsWith(
-        "/user"
-      ) &&
-      !payload.isAdmin
-    ) {
-      return NextResponse.redirect(
-        new URL("/dashboard", req.url)
-      );
+   if (req.nextUrl.pathname.startsWith("/user") && !payload.isAdmin) {
+      
+      const redirectUrl = new URL("/dashboard", req.url);
+
+      redirectUrl.searchParams.set("error", "unauthorized");
+
+      return NextResponse.redirect(redirectUrl);
     }
 
 

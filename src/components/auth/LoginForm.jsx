@@ -5,6 +5,7 @@ import Button from "../ui/Button";
 import Link from "next/link";
 import { useState } from "react";
 import { useLogin } from "@/hooks/useLogin";
+import { toast } from "sonner";
 
 export default function LoginForm() {
   const { login, loading } = useLogin();
@@ -26,8 +27,9 @@ export default function LoginForm() {
 
     try {
       await login(form);
+      toast.success("Login successful! Redirecting...");
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || "Something went wrong!");
     }
   };
 
@@ -58,6 +60,7 @@ export default function LoginForm() {
         id="login"
         variant="primary"
         type="submit"
+        disabled={loading} // Bagus untuk mencegah double-submit saat loading
       />
 
       <div className="pt-2 w-full flex justify-center">

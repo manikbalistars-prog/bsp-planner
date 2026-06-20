@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Sidebar from "@/components/layout/Sidebar";
+import { toast, Toaster } from "sonner";
 
 
 export default function DashboardLayout({ children }) {
-
+    const searchParams = useSearchParams()
     const [user, setUser] = useState(null);
+    const errorType = searchParams.get("error")
 
 
     useEffect(() => {
@@ -24,8 +27,16 @@ export default function DashboardLayout({ children }) {
 
         getUser();
     }, []);
+
+    useEffect(() => {
+        if (errorType === "unauthorized") {
+            toast.error("You don't have access to that page!");
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, [errorType]);
     return (
         <div className="flex w-full h-screen p-2 gap-2 overflow-hidden">
+            <Toaster position="top-center" richColors />
             <Sidebar></Sidebar>
             <div className="w-full flex flex-col flex-1 gap-2">
                 <Navbar username={user?.name}></Navbar>

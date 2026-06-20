@@ -22,6 +22,8 @@ export async function POST(req) {
       );
     }
 
+    // console.log(user)
+
     const valid =
       await bcrypt.compare(
         password,
@@ -45,7 +47,7 @@ export async function POST(req) {
         name: user.name,
         id_branch: user.id_branch,
         isAdmin: user.isAdmin,
-        isOwner: user.isOwner,
+        id_role: user.role,
       },
       process.env.JWT_SECRET,
       {

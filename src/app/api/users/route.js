@@ -15,7 +15,7 @@ export async function POST(req) {
       name: body.name,
       id_branch: body.id_branch ? Number(body.id_branch) : null,
       isAdmin: body.isAdmin,
-      isOwner: body.isOwner,
+      role : body.role
     });
 
     return NextResponse.json({

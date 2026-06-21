@@ -52,7 +52,7 @@ export async function POST(req) {
       data: user,
     });
   } catch (err) {
-    console.error("🔥 Error di POST /api/user:", err);
+
     if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
       return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
     }

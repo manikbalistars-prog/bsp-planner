@@ -15,8 +15,9 @@ import { Spinner } from "@/components/ui/spinner"
 import Link from "next/link"
 import { IconEdit, IconTrash, IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 
+import { useAuth } from "@/context/AuthContext"
 
-export default function users() {
+export default function Users() {
     const [users, setUsers] = useState([])
     const [page, setPage] = useState(1);
 
@@ -26,6 +27,9 @@ export default function users() {
 
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
+
+    const { currentUser } = useAuth()
+
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedSearch(search);
@@ -60,8 +64,11 @@ export default function users() {
     return (
         <div className="flex flex-col gap-2">
             <div className="flex justify-between">
-                <p>All users</p>
-                <Link href="/user/create"><MyButton label="add user"></MyButton></Link>
+                <p>All users </p>
+
+                {currentUser?.isAdmin && (
+                    <Link href="/user/create"><MyButton label="add user"></MyButton></Link>
+                )}
             </div>
 
             <div className="flex gap-2">
@@ -107,7 +114,8 @@ export default function users() {
                             <TableHead>Branch</TableHead>
                             <TableHead>Role</TableHead>
                             <TableHead>Username</TableHead>
-                            <TableHead className="text-center">Action</TableHead>
+                            {currentUser?.isAdmin && (<TableHead className="text-center">Action</TableHead>)}
+
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -130,12 +138,14 @@ export default function users() {
                                     <TableCell>{user.branch?.name || "-"}</TableCell>
                                     <TableCell>{user.role?.role || "-"}</TableCell>
                                     <TableCell>{user.username || "-"}</TableCell>
-                                    <TableCell>
-                                        <div className="flex gap-2 items-center justify-center">
-                                            <Link href={`/user/edit?id=${user.id}`}> <MyButton iconOnly icon={IconEdit} variant="warning"></MyButton></Link>
-                                            <Link href="#"> <MyButton iconOnly icon={IconTrash} variant="danger"></MyButton></Link>
-                                        </div>
-                                    </TableCell>
+                                    {currentUser?.isAdmin && (
+                                        <TableCell>
+                                            <div className="flex gap-2 items-center justify-center">
+                                                <Link href={`/user/edit?id=${user.id}`}> <MyButton iconOnly icon={IconEdit} variant="warning"></MyButton></Link>
+                                                <Link href="#"> <MyButton iconOnly icon={IconTrash} variant="danger"></MyButton></Link>
+                                            </div>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))
                         )}

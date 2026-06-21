@@ -22,11 +22,7 @@ export default function Sidebar({ isAdmin }) {
                     <div className="gap-6 flex flex-col">
                         <LinkSidebar href="/dashboard" label="Dashboard" icon={IconLayoutDashboard} open={open} />
                         <LinkSidebar href="/planner" label="Planner" icon={IconCalendarEvent} open={open} />
-                        {isAdmin && (
-                            <LinkSidebar href="/user" label="Add User" icon={IconUsers} open={open} />
-                        )}
-
-
+                        <LinkSidebar href="/user" label="Add User" icon={IconUsers} open={open} />
                     </div>
 
                 </div>

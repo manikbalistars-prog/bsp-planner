@@ -45,9 +45,9 @@ export async function POST(req) {
         id: user.id,
         username: user.username,
         name: user.name,
-        id_branch: user.id_branch,
+        branch: user.branch,
         isAdmin: user.isAdmin,
-        id_role: user.role,
+        role: user.role,
       },
       process.env.JWT_SECRET,
       {

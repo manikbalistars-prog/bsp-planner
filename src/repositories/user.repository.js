@@ -16,8 +16,8 @@ export const findUserByUsername = async (username) => {
     .from("users")
     .select(`
       *,
-      role:id_role (
-        role
+      role:id_role ( id, role ),
+      branch:id_branch ( id, name )
       )
     `)
     .eq("username", username)

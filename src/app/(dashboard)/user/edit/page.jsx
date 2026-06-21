@@ -15,7 +15,7 @@ export default async function Page({ searchParams }) {
     try {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (!decoded.isAdmin) redirect("/dashboard");
+        if (!decoded.isAdmin) redirect("/dashboard?error=unauthorized");
 
 
         const params = await searchParams;

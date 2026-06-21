@@ -14,7 +14,7 @@ export default async function Page() {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded.isAdmin) redirect("/dashboard");
+    if (!decoded.isAdmin) redirect("/dashboard?error=unauthorized");
 
 
     const roles = await getAllRole();
@@ -23,6 +23,9 @@ export default async function Page() {
 
     return <UserFormClient dbRoles={roles} dbBranches={branches}  />;
   } catch (error) {
+   if (error.message === "NEXT_REDIRECT" || error.digest?.includes("NEXT_REDIRECT")) {
+      throw error;
+    }
     redirect("/login");
   }
 }

@@ -19,7 +19,7 @@ export default function Navbar({ user }) {
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 cursor-pointer select-none focus:outline-none hover:opacity-80 transition disabled:opacity-50" disabled={loading}>
           <p className="text-sm text-stone-900">
-            Hi, {user?.username || "Guest"}
+            Hi, {user?.name || "Guest"}
           </p>
           <div className="bg-blue-100 w-8 h-8 rounded-full flex items-center justify-center">
             <IconUser className="text-blue-500 w-5 h-5" />

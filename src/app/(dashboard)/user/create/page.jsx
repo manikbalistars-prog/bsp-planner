@@ -21,7 +21,7 @@ export default async function Page() {
     const branches = await getAllBranches()
 
 
-    return <UserFormClient dbRoles={roles} dbBranches={branches} />;
+    return <UserFormClient dbRoles={roles} dbBranches={branches}  />;
   } catch (error) {
     redirect("/login");
   }

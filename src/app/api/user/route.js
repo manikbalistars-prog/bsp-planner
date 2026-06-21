@@ -10,7 +10,7 @@ export async function GET(req) {
     const page = Number(searchParams.get("page")) || 1;
     const limit = Number(searchParams.get("limit")) || 10;
     const search = searchParams.get("search") || "";
-   
+
     const result = await getUsersPaginated({ page, limit, search });
 
     return NextResponse.json({ success: true, ...result });
@@ -43,7 +43,8 @@ export async function POST(req) {
       name: body.name,
       id_branch: body.id_branch ? Number(body.id_branch) : null,
       isAdmin: body.isAdmin,
-      id_role: body.id_role
+      id_role: body.id_role,
+      isDelete: body.isDelete
     });
 
     return NextResponse.json({

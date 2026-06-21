@@ -68,7 +68,7 @@ export async function getUsersPaginated({ page = 1, limit = 10, search = "" }) {
       id_branch,
       id_role,
       role:id_role ( role ),
-      branch:id_branch ( name )`, { count: "exact" });
+      branch:id_branch ( name )`, { count: "exact" }).eq("isDelete", false);;
 
 
   if (search) {

@@ -28,6 +28,7 @@ export default function UserFormClient({ dbRoles = [], dbBranches = [], currentU
         id_branch: currentUser?.id_branch || "",
         id_role: currentUser?.id_role || "",
         isAdmin: currentUser?.isAdmin || false,
+        isDelete: false
     });
 
     const save = async () => {
@@ -64,6 +65,7 @@ export default function UserFormClient({ dbRoles = [], dbBranches = [], currentU
                         id_branch: "",
                         id_role: "",
                         isAdmin: false,
+                        isDelete: false
                     });
                 }
 

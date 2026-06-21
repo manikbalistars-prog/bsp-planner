@@ -1,6 +1,6 @@
 // src/app/api/users/route.js
 import { NextResponse } from "next/server";
-import { getUsersPaginated, createUser } from "@/repositories/user.repository";
+import { getUsersPaginated, createUser, findUserByUsername } from "@/repositories/user.repository";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
@@ -31,9 +31,17 @@ export async function POST(req) {
 
 
     if (!decoded.isAdmin) {
-      return NextResponse.json({ success: false, message: "Forbidden bruh!" }, { status: 403 });
+      return NextResponse.json({ success: false, message: "Forbidden bruh! only admin" }, { status: 403 });
     }
     const body = await req.json();
+
+    const existingUser = await findUserByUsername(body.username);
+    if (existingUser) {
+      return NextResponse.json({
+        success: false,
+        message: `Username "${body.username}" already exist!`
+      }, { status: 400 });
+    }
 
     const hash = await bcrypt.hash(body.password, 10);
 

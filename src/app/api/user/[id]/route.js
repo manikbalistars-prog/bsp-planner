@@ -59,7 +59,45 @@ export async function PUT(req, { params }) {
     if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
       return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
     }
-    console.error("🔥 Error update user:", err);
+   
+    return NextResponse.json({ success: false, message: err.message || "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req, { params }) {
+  try {
+ 
+    const token = req.cookies.get("session")?.value;
+    if (!token) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded.isAdmin) {
+      return NextResponse.json({ success: false, message: "Forbidden bruh! only admin" }, { status: 403 });
+    }
+
+    const { id } = await params; 
+    const { data, error } = await supabase
+      .from("users")
+      .update({ isDelete: true })
+      .eq("id", Number(id))
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ 
+      success: true, 
+      message: "User deleted successfully (Soft Delete)",
+      data 
+    });
+  } catch (err) {
+    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+      return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
+    }
+   
     return NextResponse.json({ success: false, message: err.message || "Internal Server Error" }, { status: 500 });
   }
 }

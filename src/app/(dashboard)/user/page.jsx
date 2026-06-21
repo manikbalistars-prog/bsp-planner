@@ -17,6 +17,8 @@ import { IconEdit, IconTrash, IconChevronLeft, IconChevronRight } from "@tabler/
 
 import { useAuth } from "@/context/AuthContext"
 
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog"
+
 export default function Users() {
     const [users, setUsers] = useState([])
     const [page, setPage] = useState(1);
@@ -30,7 +32,49 @@ export default function Users() {
 
     const { currentUser } = useAuth()
 
+    const loadUsers = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/user?page=${page}&limit=${limit}&search=${debouncedSearch}`);
+            const data = await res.json();
+            if (data.success) {
+                setUsers(data.users);
+                setTotalPages(data.totalPages);
+            }
+        } catch (err) {
+            toast.error("failed to fetching data", {
+                description: err.message || "Something went wrong"
+            })
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const handleDelete = async (id, name) => {
+        if (!currentUser?.isAdmin) {
+            toast.error("You don't have access for that action!");
+            return
+        }
+        try {
+            const res = await fetch(`/api/user/${id}`, {
+                method: "DELETE",
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                toast.success(`User "${name}" success deleted!`);
+                loadUsers();
+            } else {
+                toast.error(data.message || "Fail to delete user!");
+            }
+        } catch (err) {
+            toast.error("Something went wrong", { description: err.message });
+        }
+    };
+
     useEffect(() => {
+        if (search === "" && debouncedSearch === "") return;
         const handler = setTimeout(() => {
             setDebouncedSearch(search);
             setPage(1);
@@ -41,30 +85,13 @@ export default function Users() {
     }, [search]);
 
     useEffect(() => {
-        const loadUsers = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch(`/api/user?page=${page}&limit=${limit}&search=${debouncedSearch}`);
-                const data = await res.json();
-                if (data.success) {
-                    setUsers(data.users);
-                    setTotalPages(data.totalPages);
-                }
-            } catch (err) {
-                toast.error("failed to fetching data", {
-                    description: err.message || "Something went wrong"
-                })
-            } finally {
-                setLoading(false);
-            }
-        };
-
         loadUsers();
     }, [page, debouncedSearch, limit]);
+
     return (
         <div className="flex flex-col gap-2">
             <div className="flex justify-between">
-                <p>All users </p>
+                <p className="font-semibold text-stone-800">All users </p>
 
                 {currentUser?.isAdmin && (
                     <Link href="/user/create"><MyButton label="add user"></MyButton></Link>
@@ -72,7 +99,7 @@ export default function Users() {
             </div>
 
             <div className="flex gap-2">
-                <div className="flex flex-col  gap-2 text-sm text-stone-600 shrink-0">
+                <div className="flex flex-col gap-2 text-sm text-stone-600 shrink-0">
                     <span>Search</span>
                     <input
                         type="text"
@@ -82,10 +109,9 @@ export default function Users() {
                             setSearch(e.target.value);
                             setPage(1);
                         }}
-                        className="w-full sm:w-64 px-3 py-1.5 text-sm rounded-md border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                        className="w-full sm:w-64 px-3 py-1.5 text-sm rounded-md border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-stone-500/20 focus:border-stone-500"
                     />
                 </div>
-
 
                 <div className="flex flex-col gap-2 text-sm text-stone-600 shrink-0">
                     <span>Show</span>
@@ -95,7 +121,7 @@ export default function Users() {
                             setLimit(Number(e.target.value));
                             setPage(1);
                         }}
-                        className="px-2 py-1.5 bg-white border border-stone-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        className="px-2 py-1.5 bg-white border border-stone-200 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500/20"
                     >
                         <option value={5}>5 </option>
                         <option value={10}>10 </option>
@@ -105,9 +131,8 @@ export default function Users() {
                 </div>
             </div>
 
-            <div className="bg-white p-2 rounded-lg">
+            <div className="bg-white p-2 rounded-lg border border-stone-100 shadow-sm">
                 <Table>
-
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
@@ -115,55 +140,83 @@ export default function Users() {
                             <TableHead>Role</TableHead>
                             <TableHead>Username</TableHead>
                             {currentUser?.isAdmin && (<TableHead className="text-center">Action</TableHead>)}
-
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
-
                             <TableRow>
-
                                 <TableCell colSpan={5} className="h-32 text-center">
                                     <div className="flex justify-center items-center gap-2">
                                         <Spinner />
-
                                     </div>
                                 </TableCell>
                             </TableRow>
+                        ) : users.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={5} className="h-32 text-center text-sm text-stone-400">
+                                    No users found.
+                                </TableCell>
+                            </TableRow>
                         ) : (
-
                             users.map((user) => (
                                 <TableRow key={user.id}>
-                                    <TableCell>{user.name}</TableCell>
+                                    <TableCell className="font-medium">{user.name}</TableCell>
                                     <TableCell>{user.branch?.name || "-"}</TableCell>
                                     <TableCell>{user.role?.role || "-"}</TableCell>
                                     <TableCell>{user.username || "-"}</TableCell>
                                     {currentUser?.isAdmin && (
                                         <TableCell>
                                             <div className="flex gap-2 items-center justify-center">
-                                                <Link href={`/user/edit?id=${user.id}`}> <MyButton iconOnly icon={IconEdit} variant="warning"></MyButton></Link>
-                                                <Link href="#"> <MyButton iconOnly icon={IconTrash} variant="danger"></MyButton></Link>
+                                                <Link href={`/user/edit?id=${user.id}`}>
+                                                    <MyButton iconOnly icon={IconEdit} variant="warning"></MyButton>
+                                                </Link>
+
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <MyButton iconOnly icon={IconTrash} variant="danger" />
+                                                    </AlertDialogTrigger>
+
+                                                    <AlertDialogContent size="sm">
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                                                <IconTrash size={20} />
+                                                            </AlertDialogMedia>
+
+                                                            <AlertDialogTitle>
+                                                                Delete User
+                                                            </AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to delete <span className="font-semibold text-stone-800">"{user.name}"</span>?
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                variant="destructive"
+                                                                onClick={() => handleDelete(user.id, user.name)}
+                                                            >
+                                                                Delete
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </div>
                                         </TableCell>
                                     )}
                                 </TableRow>
                             ))
                         )}
-
-
                     </TableBody>
                 </Table>
-
             </div>
+
             <div className="flex justify-between items-center px-2 bg-white p-3 rounded-lg border border-stone-100">
-                {/* Informasi Page Aktif */}
                 <p className="text-xs sm:text-sm text-stone-500 font-medium">
                     Page <span className="text-stone-800">{page}</span> of <span className="text-stone-800">{totalPages}</span>
                 </p>
 
-
                 <div className="flex items-center gap-1.5">
-
                     <MyButton
                         icon={IconChevronLeft}
                         iconOnly

@@ -181,7 +181,7 @@ export default function UserFormClient({ dbRoles = [], dbBranches = [], currentU
             </div>
 
             <MyButton
-                label={loading ? "Menyimpan..." : isEditMode ? "Update User" : "Simpan User"}
+                label={loading ? "Updating..." : isEditMode ? "Update User" : "Save User"}
                 onClick={save}
                 variant={loading ? "disable" : "primary"}
             />

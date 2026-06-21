@@ -1,10 +1,10 @@
 'use client';
-import { IconDeviceAnalytics, IconArrowBarRight, IconArrowBarLeft, IconLayoutDashboard, IconCalendarEvent } from "@tabler/icons-react"
+import { IconDeviceAnalytics, IconArrowBarRight, IconArrowBarLeft, IconLayoutDashboard, IconCalendarEvent, IconUsers } from "@tabler/icons-react"
 import { useState } from "react"
 import LinkSidebar from "../ui/LinkSidebar";
 
 
-export default function Sidebar() {
+export default function Sidebar({ isAdmin }) {
     const [open, setOpen] = useState(false)
 
 
@@ -22,14 +22,15 @@ export default function Sidebar() {
                     <div className="gap-6 flex flex-col">
                         <LinkSidebar href="/dashboard" label="Dashboard" icon={IconLayoutDashboard} open={open} />
                         <LinkSidebar href="/planner" label="Planner" icon={IconCalendarEvent} open={open} />
+                        <LinkSidebar href="/user" label="Users" icon={IconUsers} open={open} />
                     </div>
 
                 </div>
             </div>
             <div className="text-stone-500 w-full border-t-stone-300 border-t pt-2 flex items-center justify-center">
                 <button onClick={() => setOpen(!open)} className="hover:cursor-pointer hover:text-stone-900">
-                   
-                    {!open? <IconArrowBarRight/>: <IconArrowBarLeft/>}
+
+                    {!open ? <IconArrowBarRight /> : <IconArrowBarLeft />}
                 </button>
 
             </div>

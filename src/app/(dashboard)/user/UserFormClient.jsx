@@ -32,7 +32,7 @@ export default function UserFormClient({ dbRoles = [], dbBranches = [], currentU
     });
 
     const save = async () => {
-        if (!form.username || (!isEditMode && !form.password) || !form.name || !form.id_role || !form.id_branch) {
+        if (!form.username || (!isEditMode && !form.password) || !form.name || !form.id_role) {
             toast.error("Fill all field!");
             return;
         }

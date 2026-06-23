@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getAllRole } from "@/repositories/role.repository";
 import { getAllBranches } from "@/repositories/branch.repository";
 import { findUserById } from "@/repositories/user.repository";
-import UserFormClient from "../UserFormClient";
+import UserFormClient from "@/app/(dashboard)/user/UserFormClient";
 export default async function Page({ searchParams }) {
     const cookieStore = await cookies();
     const token = cookieStore.get("session")?.value;

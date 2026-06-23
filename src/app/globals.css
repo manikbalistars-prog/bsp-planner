@@ -99,25 +99,7 @@ body {
   border-radius: 0 5px 5px 0;
 }
 
-/* Chrome, Edge, Safari */
-::-webkit-scrollbar {
-  width: 6px;
-}
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #a8a29e;
-  /* stone-400 */
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #78716c;
-  /* stone-500 */
-}
 
 .dark {
   --background: oklch(0.145 0 0);

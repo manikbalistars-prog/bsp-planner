@@ -22,7 +22,7 @@ export async function POST(req) {
       );
     }
 
-    // console.log(user)
+
 
     const valid =
       await bcrypt.compare(
@@ -46,8 +46,9 @@ export async function POST(req) {
         username: user.username,
         name: user.name,
         branch: user.branch,
-        isAdmin: user.isAdmin,
         role: user.role,
+        area: user.area,
+        isAdmin: user.isAdmin,
       },
       process.env.JWT_SECRET,
       {

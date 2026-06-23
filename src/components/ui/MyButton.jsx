@@ -13,6 +13,7 @@ const MyButton = ({
 }) => {
     const variants = {
         primary: "bg-blue-500 text-white hover:bg-blue-700 cursor-pointer",
+        success: "bg-green-500 text-white hover:bg-green-700 cursor-pointer",
         danger: "bg-red-500 text-white hover:bg-red-700 cursor-pointer",
         warning: "bg-yellow-500 text-white hover:bg-yellow-700 cursor-pointer",
         white: "bg-white text-black hover:bg-stone-200 cursor-pointer",

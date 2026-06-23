@@ -11,7 +11,7 @@ export default function InputForm({ label, type = "text", name, id = { name }, p
                 placeholder={placeholder}
                 required={required}
                 {...props}
-                className="bg-white px-2 py-1 rounded-sm focus:outline-none"
+                className="bg-white px-2 py-1 rounded-sm focus:outline-none border border-stone-200"
             />
         </div>
     )

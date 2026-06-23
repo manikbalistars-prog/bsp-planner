@@ -98,8 +98,8 @@ export default function Users() {
                 )}
             </div>
 
-            <div className="flex gap-2">
-                <div className="flex flex-col gap-2 text-sm text-stone-600 shrink-0">
+            <div className="flex gap-2 flex-wrap">
+                <div className="flex flex-col gap-2 text-sm text-stone-600 shrink-0 ">
                     <span>Search</span>
                     <input
                         type="text"
@@ -131,7 +131,7 @@ export default function Users() {
                 </div>
             </div>
 
-            <div className="bg-white p-2 rounded-lg border border-stone-100 shadow-sm">
+            <div className="bg-white p-2 rounded-lg border border-stone-100">
                 <Table>
                     <TableHeader>
                         <TableRow>

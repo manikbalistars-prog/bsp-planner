@@ -10,7 +10,7 @@ export default function Sidebar({ isAdmin }) {
 
     return (
 
-        <div className="h-full min-w-11 bg-stone-100 rounded-xl pt-5 pb-3 px-5 flex flex-col justify-between items-center" >
+        <div className="h-full min-w-2 bg-stone-100 rounded-xl pt-5 pb-3 px-3 flex flex-col justify-between items-center" >
             <div className="flex flex-col items-center">
                 <IconDeviceAnalytics className="text-stone-500"></IconDeviceAnalytics>
                 <div className="border-b border-b-stone-300 pt-1 w-full"></div>
@@ -19,9 +19,9 @@ export default function Sidebar({ isAdmin }) {
                     {open && (
                         <p className="text-sm text-stone-400 py-4">menu</p>
                     )}
-                    <div className="gap-6 flex flex-col">
+                    <div className="gap-7 flex flex-col">
                         <LinkSidebar href="/dashboard" label="Dashboard" icon={IconLayoutDashboard} open={open} />
-                        <LinkSidebar href="/planner" label="Planner" icon={IconCalendarEvent} open={open} />
+                        <LinkSidebar href="/plan" label="Planner" icon={IconCalendarEvent} open={open} />
                         <LinkSidebar href="/user" label="Users" icon={IconUsers} open={open} />
                     </div>
 

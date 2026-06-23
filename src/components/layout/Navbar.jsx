@@ -15,7 +15,7 @@ export default function Navbar({ user }) {
 
   return (
     <div className="bg-stone-100 rounded-xl py-3 px-3 flex justify-between items-center">
-      <span className="text-sm text-stone-500">{`${user?.role?.role || null} | ${user?.branch?.name || null}`} </span>
+      <span className="text-sm text-stone-500">{`${user?.role?.role || ""} | ${user?.branch?.name || user?.area?.area || ""}`} </span>
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 cursor-pointer select-none focus:outline-none hover:opacity-80 transition disabled:opacity-50" disabled={loading}>
           <p className="text-sm text-stone-900">

@@ -88,15 +88,15 @@ body {
   background-color: var(--bg);
 }
 
-.li-active::before {
-  content: "";
-  width: 5px;
-  height: 30px;
-  background-color: #2b7fff;
-
+.li-active::after {
+  /* content: "";
+  width:100px;
+  height: 60px;
   position: absolute;
-  left: 8px;
-  border-radius: 0 5px 5px 0;
+  border-radius: 100% 100% 0 0;
+  bottom:-4px;
+  z-index: 2;
+  background-color: oklch(0.488 0.243 264.376); */
 }
 
 

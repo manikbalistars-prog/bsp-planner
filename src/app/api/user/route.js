@@ -1,4 +1,4 @@
-// src/app/api/users/route.js
+
 import { NextResponse } from "next/server";
 import { getUsersPaginated, createUser, findUserByUsername } from "@/repositories/user.repository";
 import jwt from "jsonwebtoken";

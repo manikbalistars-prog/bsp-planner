@@ -118,8 +118,8 @@ export default function UserFormClient({ dbRoles = [], dbBranches = [], currentU
             <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-stone-700">Role</label>
                 <Combobox
-                    items={dbRoles} // Oper array objek utuh
-                    value={form.id_role ? String(form.id_role) : ""} // Ikat pakai string ID murni
+                    items={dbRoles}
+                    value={form.id_role ? String(form.id_role) : ""} 
                     onValueChange={(val) => {
                         setForm({ ...form, id_role: val ? Number(val) : "" });
                     }}

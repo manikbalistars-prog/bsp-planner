@@ -89,7 +89,7 @@ export default function Users() {
     }, [page, debouncedSearch, limit]);
 
     return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 px-2">
             <div className="flex justify-between">
                 <p className="font-semibold text-stone-800">All users </p>
 
@@ -138,7 +138,7 @@ export default function Users() {
                             <TableHead>Name</TableHead>
                             <TableHead>Branch</TableHead>
                             <TableHead>Role</TableHead>
-                            <TableHead>Username</TableHead>
+                            {currentUser?.isAdmin && (<TableHead>Username</TableHead>)}
                             {currentUser?.isAdmin && (<TableHead className="text-center">Action</TableHead>)}
                         </TableRow>
                     </TableHeader>
@@ -163,7 +163,7 @@ export default function Users() {
                                     <TableCell className="font-medium">{user.name}</TableCell>
                                     <TableCell>{user.branch?.name || "-"}</TableCell>
                                     <TableCell>{user.role?.role || "-"}</TableCell>
-                                    <TableCell>{user.username || "-"}</TableCell>
+                                    {currentUser?.isAdmin && (<TableCell>{user.username || "-"}</TableCell>)}
                                     {currentUser?.isAdmin && (
                                         <TableCell>
                                             <div className="flex gap-2 items-center justify-center">

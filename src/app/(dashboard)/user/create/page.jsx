@@ -1,4 +1,4 @@
-// src/app/(dashboard)/user/page.jsx
+
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { redirect } from "next/navigation";

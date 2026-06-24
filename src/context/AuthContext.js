@@ -1,4 +1,4 @@
-// src/context/AuthContext.js
+
 "use client";
 
 import { createContext, useContext } from "react";

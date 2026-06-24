@@ -15,7 +15,7 @@ export const formatDate = (dateString, withDay = false) => {
 
   const options = {
     year: "numeric",
-    month: "long", // 
+    month: "long",
     day: "numeric",
   };
 

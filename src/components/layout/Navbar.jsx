@@ -14,7 +14,7 @@ export default function Navbar({ user }) {
   const { logout, loading } = useLogout()
 
   return (
-    <div className="bg-stone-100 rounded-xl py-3 px-3 flex justify-between items-center">
+    <div className="py-3 px-3 flex justify-between items-center">
       <span className="text-sm text-stone-500">{`${user?.role?.role || ""} | ${user?.branch?.name || user?.area?.area || ""}`} </span>
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 cursor-pointer select-none focus:outline-none hover:opacity-80 transition disabled:opacity-50" disabled={loading}>
@@ -33,7 +33,7 @@ export default function Navbar({ user }) {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={logout} // Eksekusi di sini
+            onClick={logout}
             disabled={loading}
             className="cursor-pointer focus:bg-blue-50 flex items-center gap-2"
           >

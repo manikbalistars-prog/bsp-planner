@@ -2,11 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
-import Sidebar from "@/components/layout/Sidebar";
+import BottomBar from "@/components/layout/BottomBar";
 import { toast } from "sonner";
 
 import { Spinner } from "@/components/ui/spinner"
 import { AuthContext } from "@/context/AuthContext";
+import { usePathname } from "next/navigation";
 
 
 export default function DashboardLayout({ children }) {
@@ -14,6 +15,12 @@ export default function DashboardLayout({ children }) {
     const [user, setUser] = useState(null);
     const errorType = searchParams.get("error")
     const [layoutLoading, setLayoutLoading] = useState(true);
+
+    const pathname = usePathname()
+    const showOnPaths = ["/plan", "/dashboard", "/user"];
+    const shouldShow = showOnPaths.includes(pathname);
+
+
 
     useEffect(() => {
         const getUser = async () => {
@@ -49,14 +56,17 @@ export default function DashboardLayout({ children }) {
     }
     return (
         <AuthContext.Provider value={{ currentUser: user }}>
-            <div className="w-full h-screen p-2 gap-2 overflow-hidden flex">
-                <Sidebar isAdmin={user?.isAdmin}></Sidebar>
-                <div className="min-w-0 flex flex-col flex-1 gap-2">
-                    <Navbar user={user} ></Navbar>
-                    <div className=" w-full flex-1 bg-stone-100 rounded-xl py-3 px-3 overflow-y-scroll">
-                        {children}
-                    </div>
+            <div className=" flex flex-col gap-2 bg-lime-50">
+                <div className="fixed w-full shadow-sm rounded-b-xl bg-white top-0 z-50"><Navbar user={user}></Navbar></div>
+                <div className="min-h-11"></div>
+                <div className=" w-full flex-1 rounded-xl py-3 min-h-screen px-2">
+                    {children}
                 </div>
+
+                {shouldShow && (
+                    <div className="bg-white w-full px-8 rounded-t-lg fixed bottom-0 drop-shadow-lg"><BottomBar></BottomBar></div>
+                )}
+                 <div className="min-h-14"></div>
             </div>
         </AuthContext.Provider>
     )

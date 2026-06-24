@@ -18,8 +18,6 @@ export const getAllPlans = async ({
     area 
 }) => {
 
-    console.log({ areaGroup, area })
-
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 

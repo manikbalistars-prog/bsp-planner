@@ -1,14 +1,5 @@
 'use client'
 import { MyButton } from "@/components/ui/MyButton"
-import {
-    Table,
-    TableBody,
-    TableHead,
-    TableHeader,
-    TableRow,
-    TableCell
-} from "@/components/ui/table"
-
 import { Spinner } from "@/components/ui/spinner"
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
@@ -29,6 +20,7 @@ export default function Plan() {
 
     const [limit, setLimit] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
+    const [totalData, setTotalData] = useState(0)
     const [loading, setLoading] = useState(false);
 
     const [search, setSearch] = useState("");
@@ -45,6 +37,7 @@ export default function Plan() {
             if (data.success) {
                 setData(data.data)
                 setTotalPages(data.totalPages)
+                setTotalData(data.totalData)
             }
 
         } catch (error) {
@@ -88,41 +81,46 @@ export default function Plan() {
     }
     return (
         <div className="flex flex-col gap-2">
-            <div className="flex justify-between">
-                <p className="font-semibold text-stone-800">All Plans</p>
-                <Link href="/plan/create"><MyButton label="add plan"></MyButton></Link>
-            </div>
-
-            <div className="flex gap-2 flex-wrap">
-                <div className="flex flex-col gap-2 text-sm text-stone-600 shrink-0">
-                    <span>Search</span>
-                    <input
-                        type="text"
-                        placeholder="Search users by title..."
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(1);
-                        }}
-                        className="w-full sm:w-64 px-3 py-1.5 text-sm rounded-md border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-stone-500/20 focus:border-stone-500"
-                    />
+            <div className="bg-white p-3 rounded-lg  flex flex-col justify-between ">
+                <div className="flex justify-between">
+                    <p className="font-semibold text-stone-600">All Plans</p>
+                    <Link href="/plan/create"><MyButton label="Create Plan" variant="success"></MyButton></Link>
                 </div>
 
-                <div className="flex flex-col gap-2 text-sm text-stone-600 shrink-0">
-                    <span>Show</span>
-                    <select
-                        value={limit}
-                        onChange={(e) => {
-                            setLimit(Number(e.target.value));
-                            setPage(1);
-                        }}
-                        className="px-2 py-1.5 bg-white border border-stone-200 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500/20"
-                    >
-                        <option value={5}>5 </option>
-                        <option value={10}>10 </option>
-                        <option value={25}>25 </option>
-                        <option value={50}>50 </option>
-                    </select>
+                <div className="flex justify-between items-end">
+                    <div className="flex gap-2 flex-wrap">
+                        <div className="flex flex-col gap-2 text-sm text-stone-500 shrink-0">
+                            <span>Search</span>
+                            <input
+                                type="text"
+                                placeholder="Search users by title..."
+                                value={search}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    setPage(1);
+                                }}
+                                className="w-full sm:w-64 px-3 text-stone-400 py-1.5 text-sm rounded-md border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-stone-500/20 focus:border-stone-500"
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2 text-sm text-stone-500 shrink-0">
+                            <span>Show</span>
+                            <select
+                                value={limit}
+                                onChange={(e) => {
+                                    setLimit(Number(e.target.value));
+                                    setPage(1);
+                                }}
+                                className="px-2 py-1.5 text-stone-900 bg-white border border-stone-200 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500/20"
+                            >
+                                <option value={5}>5 </option>
+                                <option value={10}>10 </option>
+                                <option value={25}>25 </option>
+                                <option value={50}>50 </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="text-xs text-stone-400">Total Plans : <span className="text-stone-900">{totalData}</span> </div>
                 </div>
             </div>
 
@@ -140,7 +138,7 @@ export default function Plan() {
                         <div
                             key={item.id}
                             onClick={() => handleNavigateToDetail(item)}
-                            className="bg-white p-3.5 rounded-sm active:bg-stone-50 cursor-pointer flex flex-col gap-2 hover:bg-stone-50"
+                            className="bg-white p-3.5 rounded-sm active:bg-stone-50 cursor-pointer flex flex-col gap-2 hover:bg-blue-50"
                         >
                             <div className="flex justify-between items-start gap-2">
                                 <span className="font-semibold text-stone-900 text-sm line-clamp-2 leading-snug">
@@ -173,27 +171,29 @@ export default function Plan() {
                 )}
             </div>
 
-            <div className="flex justify-between items-center px-2 bg-white p-3 rounded-lg border border-stone-100">
-                <p className="text-xs sm:text-sm text-stone-500 font-medium">
+            <div className="">
+                <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-stone-100">
+                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
 
-                    Page <span className="text-stone-800">{page}</span> of <span className="text-stone-800">{totalPages}</span>
-                </p>
+                        Page <span className="text-stone-800">{page}</span> of <span className="text-stone-800">{totalPages}</span>
+                    </p>
 
-                <div className="flex items-center gap-1.5">
-                    <MyButton
-                        icon={IconChevronLeft}
-                        iconOnly
-                        variant={page === 1 ? "disable" : "white"}
-                        disabled={page === 1}
-                        onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                    />
-                    <MyButton
-                        icon={IconChevronRight}
-                        iconOnly
-                        variant={(page === totalPages || totalPages === 0) ? "disable" : "white"}
-                        disabled={page === totalPages || totalPages === 0}
-                        onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-                    />
+                    <div className="flex items-center gap-1.5">
+                        <MyButton
+                            icon={IconChevronLeft}
+                            iconOnly
+                            variant={page === 1 ? "disable" : "white"}
+                            disabled={page === 1}
+                            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                        />
+                        <MyButton
+                            icon={IconChevronRight}
+                            iconOnly
+                            variant={(page === totalPages || totalPages === 0) ? "disable" : "white"}
+                            disabled={page === totalPages || totalPages === 0}
+                            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

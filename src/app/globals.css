@@ -88,16 +88,6 @@ body {
   background-color: var(--bg);
 }
 
-.li-active::after {
-  /* content: "";
-  width:100px;
-  height: 60px;
-  position: absolute;
-  border-radius: 100% 100% 0 0;
-  bottom:-4px;
-  z-index: 2;
-  background-color: oklch(0.488 0.243 264.376); */
-}
 
 
 

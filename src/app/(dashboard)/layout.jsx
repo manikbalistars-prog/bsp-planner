@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import BottomBar from "@/components/layout/BottomBar";
@@ -10,7 +10,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 
 
-export default function DashboardLayout({ children }) {
+function DashboardLayoutContent({ children }) {
     const searchParams = useSearchParams()
     const [user, setUser] = useState(null);
     const errorType = searchParams.get("error")
@@ -56,18 +56,39 @@ export default function DashboardLayout({ children }) {
     }
     return (
         <AuthContext.Provider value={{ currentUser: user }}>
-            <div className=" flex flex-col gap-2 bg-lime-50">
-                <div className="fixed w-full shadow-sm rounded-b-xl bg-white top-0 z-50"><Navbar user={user}></Navbar></div>
+            <div className="flex flex-col gap-2 bg-lime-50">
+
+
+                <div className="fixed w-full shadow-sm rounded-b-xl bg-white top-0 z-50">
+                    <Navbar user={user}></Navbar>
+                </div>
                 <div className="min-h-11"></div>
-                <div className=" w-full flex-1 rounded-xl py-3 min-h-screen px-2">
+
+                <div className="w-full flex-1 rounded-xl py-3 min-h-screen px-2">
                     {children}
                 </div>
-
                 {shouldShow && (
-                    <div className="bg-white w-full px-8 rounded-t-lg fixed bottom-0 drop-shadow-lg"><BottomBar></BottomBar></div>
+                    <>
+                        <div className="bg-white w-full px-8 rounded-t-lg fixed bottom-0 drop-shadow-lg z-50">
+                            <BottomBar></BottomBar>
+                        </div>
+                        <div className="min-h-14"></div>
+                    </>
                 )}
-                 <div className="min-h-14"></div>
+
             </div>
         </AuthContext.Provider>
     )
+}
+
+export default function DashboardLayout({ children }) {
+    return (
+        <Suspense fallback={
+            <div className="w-full h-screen flex items-center justify-center bg-stone-50">
+                <Spinner />
+            </div>
+        }>
+            <DashboardLayoutContent>{children}</DashboardLayoutContent>
+        </Suspense>
+    );
 }

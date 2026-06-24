@@ -73,6 +73,7 @@ export default function Plan() {
             t: item.title,
             d: item.date,
             u: item.user?.name,
+            iu:item.user?.id,
             b: item.branch?.name,
             a: item.branch?.area?.area
         }

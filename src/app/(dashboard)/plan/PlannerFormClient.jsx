@@ -8,14 +8,16 @@ import { toast } from "sonner"
 import { useState } from "react"
 import { useRouter } from "next/navigation";
 
-export default function PlannerFormClient() {
+export default function PlannerFormClient({ currentPlan = null }) {
+    const isEditMode = !!currentPlan;
     const [loading, setLoading] = useState(false)
+
 
     const router = useRouter()
 
     const [form, setForm] = useState({
-        title: "",
-        date: undefined,
+        title: currentPlan?.title || "",
+        date: currentPlan?.date ? new Date(currentPlan.date) : undefined,
     })
 
     const [errors, setErrors] = useState({
@@ -35,8 +37,6 @@ export default function PlannerFormClient() {
         }))
     }
 
-
-
     const save = async () => {
         const nextErrors = {
             title: form.title.trim() ? "" : "Title is required",
@@ -53,25 +53,24 @@ export default function PlannerFormClient() {
         setLoading(true)
         try {
 
-            const apiUrl = `/api/plan/`
-            const apiMethod = "POST"
+            const apiUrl = isEditMode ? `/api/plan/${currentPlan.id}` : `/api/plan`;
+            const apiMethod = isEditMode ? "PUT" : "POST";
+            const payloadBody = isEditMode
+                ? { id: currentPlan.id, id_user:currentPlan.id_user, ...form }
+                : form;
 
             const res = await fetch(apiUrl, {
                 method: apiMethod,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
+                body: JSON.stringify(payloadBody),
             })
 
             const result = await res.json()
 
             if (res.ok && result.success) {
-                toast.success("Success to create plan!");
-
+                toast.success(isEditMode ? "Plan updated successfully!" : "Success to create plan!");
                 router.push("/plan")
                 router.refresh()
-
-
-
             } else {
                 toast.error(result.message || "Failed to save data");
             }
@@ -88,10 +87,14 @@ export default function PlannerFormClient() {
     return (
         <div className="p-3 flex flex-col bg-white rounded-lg">
             <div className="flex justify-between items-center border-b pb-3">
-                <div>Add Plan</div>
+                <div className="font-semibold text-stone-800">{isEditMode ? "Edit Plan" : "Add Plan"}</div>
                 <div className=" flex gap-2 flex-wrap">
                     <Link href="/plan"><MyButton label="back" /></Link>
-                    <MyButton label={loading ? "proccessing..." : "submit"} onClick={save} variant={loading ? "disable" : "success"} />
+                    <MyButton
+                        label={loading ? "processing..." : isEditMode ? "update" : "submit"}
+                        onClick={save}
+                        variant={loading ? "disable" : "success"}
+                    />
                 </div>
             </div>
             <div className="pt-5 flex flex-col gap-5">

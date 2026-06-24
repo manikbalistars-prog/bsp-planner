@@ -94,3 +94,16 @@ export const getAllPlans = async ({
         totalPages: Math.ceil(count / limit),
     };
 };
+
+export const updatePlan = async (id, updateData) => {
+    const { data, error } = await supabase
+        .from("plan")
+        .update(updateData)
+        .eq("id", id)        
+        .select()
+        .single();
+
+    if (error) throw error;
+
+    return data;
+};

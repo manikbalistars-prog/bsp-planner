@@ -6,7 +6,8 @@ import { MyButton } from "@/components/ui/MyButton"
 import { formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import { Spinner } from "@/components/ui/spinner"
-import { IconClipboardPlus } from "@tabler/icons-react"
+import { IconClipboardPlus, IconEdit } from "@tabler/icons-react"
+import Link from "next/link"
 
 
 export default function PlanDetail() {
@@ -48,11 +49,19 @@ export default function PlanDetail() {
                         <div className="flex justify-between items-center border-b pb-2">
                             <div>
                                 <h1 className="text-stone-400 font-bold">Detail Plan</h1></div>
-                            <MyButton
-                                label="back"
-                                variant="primary"
-                                onClick={() => router.back()}
-                            />
+                            <div className="flex gap-2">
+                                <Link href={`/plan/edit?data=${encodeURIComponent(JSON.stringify(plan))}`}>
+                                    <MyButton
+                                        icon={IconEdit}
+                                        variant="warning"
+                                        iconOnly
+                                    /></Link>
+                                <MyButton
+                                    label="back"
+                                    variant="primary"
+                                    onClick={() => router.back()}
+                                />
+                            </div>
                         </div>
                         <div className="grid grid-cols-1 pt-2 gap-5">
                             <div className="">
@@ -83,7 +92,7 @@ export default function PlanDetail() {
 
                     <div className="bg-white rounded-sm p-3 flex flex-col gap-5">
                         <div className="flex">
-                            <MyButton label="add task" variant="success" icon={IconClipboardPlus} iconPosition="right"/>
+                            <MyButton label="add task" variant="success" icon={IconClipboardPlus} iconPosition="right" />
                         </div>
                         <div className="">content</div>
                     </div>

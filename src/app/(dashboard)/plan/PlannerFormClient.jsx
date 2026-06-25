@@ -69,8 +69,12 @@ export default function PlannerFormClient({ currentPlan = null }) {
 
             if (res.ok && result.success) {
                 toast.success(isEditMode ? "Plan updated successfully!" : "Success to create plan!");
-                router.push("/plan")
-                router.refresh()
+                const savedPlanId = result.plan?.id || currentPlan?.id
+                if (savedPlanId) {
+                    router.push(`/plan/detail?id=${savedPlanId}`)
+                } else {
+                    router.push("/plan")
+                }
             } else {
                 toast.error(result.message || "Failed to save data");
             }

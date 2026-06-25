@@ -8,6 +8,38 @@ export const createPlan = async (obj) => {
     return data
 }
 
+export const getPlanById = async (id) => {
+        const { data, error } = await supabase
+                .from("plan")
+                .select(`
+            id,
+            title,
+            date,
+            user:id_user (
+                id,
+                name,
+                role:id_role (
+                    id,
+                    role
+                )
+            ),
+            branch:id_branch (
+                id,
+                name,
+                area:id_area (
+                    id,
+                    area
+                )
+            )
+        `)
+                .eq("id", id)
+                .single();
+
+        if (error) throw error;
+
+        return data;
+};
+
 export const getAllPlans = async ({
     page = 1,
     limit = 10,

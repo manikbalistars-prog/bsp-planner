@@ -1,6 +1,35 @@
-import { updatePlan } from "@/repositories/plan.repository";
+import { getPlanById, updatePlan } from "@/repositories/plan.repository";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+
+export const GET = async (req, { params }) => {
+    try {
+        const token = req.cookies.get("session")?.value;
+        if (!token) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
+        const resolvedParams = await params;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const plan = await getPlanById(resolvedParams.id);
+
+        const isOwner = decoded.isAdmin || decoded.role?.role === "owner";
+        const isSameUser = plan.user?.id === decoded.id;
+        const isSameArea = plan.branch?.area?.area && decoded.area?.area && plan.branch.area.area === decoded.area.area;
+
+        if (!isOwner && !isSameUser && !isSameArea) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
+        return NextResponse.json({ success: true, plan });
+    } catch (error) {
+        return NextResponse.json(
+            { success: false, message: error.message },
+            { status: 500 }
+        );
+    }
+};
+
 export const PUT = async (req) => {
     try {
 

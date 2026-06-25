@@ -68,17 +68,7 @@ export default function Plan() {
 
 
     const handleNavigateToDetail = (item) => {
-        const short = {
-            id: item.id,
-            t: item.title,
-            d: item.date,
-            u: item.user?.name,
-            iu:item.user?.id,
-            b: item.branch?.name,
-            a: item.branch?.area?.area
-        }
-        const encodedData = encodeURIComponent(JSON.stringify(short));
-        router.push(`/plan/detail?data=${encodedData}`);
+        router.push(`/plan/detail?id=${item.id}`);
     }
     return (
         <div className="flex flex-col gap-2">

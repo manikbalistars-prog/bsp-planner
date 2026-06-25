@@ -20,20 +20,33 @@ export default function PlanDetail() {
 
 
     useEffect(() => {
-        const dataRaw = searchParams.get("data")
+        const id = searchParams.get("id")
 
-        if (dataRaw) {
+        if (!id) {
+            setLoading(false)
+            toast.error("Plan ID is missing")
+            return
+        }
+
+        const loadPlan = async () => {
             setLoading(true)
             try {
-                const parsedData = JSON.parse(decodeURIComponent(dataRaw))
-                setPlan(parsedData)
+                const res = await fetch(`/api/plan/${id}`)
+                const data = await res.json()
 
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || "Failed to load plan")
+                }
+
+                setPlan(data.plan)
             } catch (err) {
-                toast.error("Failed to read data", { description: err });
+                toast.error("Failed to load plan", { description: err.message });
             } finally {
                 setLoading(false)
             }
         }
+
+        loadPlan()
     }, [searchParams])
 
 
@@ -43,6 +56,16 @@ export default function PlanDetail() {
                 <div className="flex justify-center items-center h-32 gap-2">
                     <Spinner />
                 </div>
+            ) : !plan ? (
+                <div className="flex flex-col items-center justify-center h-32 gap-3 bg-white rounded-sm p-3">
+                    <div className="text-sm text-stone-500">Plan data is not available.</div>
+                    <Link href="/plan">
+                        <MyButton
+                            label="back"
+                            variant="primary"
+
+                        /></Link>
+                </div>
             ) : (
                 <div className="flex flex-col gap-2">
                     <div className="bg-white rounded-sm p-3 ">
@@ -50,33 +73,34 @@ export default function PlanDetail() {
                             <div>
                                 <h1 className="text-stone-400 font-bold">Detail Plan</h1></div>
                             <div className="flex gap-2">
-                                <Link href={`/plan/edit?data=${encodeURIComponent(JSON.stringify(plan))}`}>
+                                <Link href={`/plan/edit?id=${plan.id}`}>
                                     <MyButton
                                         icon={IconEdit}
                                         variant="warning"
                                         iconOnly
                                     /></Link>
-                                <MyButton
-                                    label="back"
-                                    variant="primary"
-                                    onClick={() => router.back()}
-                                />
+                                <Link href="/plan">
+                                    <MyButton
+                                        label="back"
+                                        variant="primary"
+
+                                    /></Link>
                             </div>
                         </div>
                         <div className="grid grid-cols-1 pt-2 gap-5">
                             <div className="">
-                                <div className="text-base font-bold text-stone-900">{plan.t}</div>
-                                <div className="text-xs text-stone-500">{formatDate(plan.d, true)}</div>
+                                <div className="text-base font-bold text-stone-900">{plan.title}</div>
+                                <div className="text-xs text-stone-500">{formatDate(plan.date, true)}</div>
                             </div>
 
                             <div className="flex flex-col gap-2">
                                 <div className="">
                                     <div className="text-xs text-stone-400">Assgined to</div>
-                                    <div className="">{plan.u}</div>
+                                    <div className="">{plan.user?.name}</div>
                                 </div>
                                 <div className="">
                                     <div className="text-xs text-stone-400">Branch</div>
-                                    <div>{plan.b}</div>
+                                    <div>{plan.branch?.name}</div>
                                 </div>
 
                             </div>

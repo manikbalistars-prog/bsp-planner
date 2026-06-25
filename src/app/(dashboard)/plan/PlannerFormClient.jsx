@@ -56,7 +56,7 @@ export default function PlannerFormClient({ currentPlan = null }) {
             const apiUrl = isEditMode ? `/api/plan/${currentPlan.id}` : `/api/plan`;
             const apiMethod = isEditMode ? "PUT" : "POST";
             const payloadBody = isEditMode
-                ? { id: currentPlan.id, id_user:currentPlan.id_user, ...form }
+                ? { id: currentPlan.id, id_user: currentPlan.id_user, ...form }
                 : form;
 
             const res = await fetch(apiUrl, {
@@ -67,17 +67,28 @@ export default function PlannerFormClient({ currentPlan = null }) {
 
             const result = await res.json()
 
-            if (res.ok && result.success) {
-                toast.success(isEditMode ? "Plan updated successfully!" : "Success to create plan!");
-                const savedPlanId = result.plan?.id || currentPlan?.id
-                if (savedPlanId) {
-                    router.push(`/plan/detail?id=${savedPlanId}`)
-                } else {
-                    router.push("/plan")
-                }
-            } else {
-                toast.error(result.message || "Failed to save data");
+            if (!res.ok) {
+                const msg =
+                    result.message === "Unauthorized"
+                        ? "You dont have access to edit this plan"
+                        : "Failed to save data";
+
+                toast.error(msg, {
+                    description: result.message,
+                });
+
+                return;
             }
+            toast.success(
+                isEditMode ? "Plan updated successfully!" : "Success to create plan!",
+            );
+            const savedPlanId = result.plan?.id || currentPlan?.id
+            if (savedPlanId) {
+                router.push(`/plan/detail?id=${savedPlanId}`)
+            } else {
+                router.push("/plan")
+            }
+            router.refresh()
 
         } catch (error) {
             toast.error("Something went wrong", { description: `${error}` });

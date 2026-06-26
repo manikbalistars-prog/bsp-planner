@@ -90,7 +90,7 @@ export default function Plan() {
                                     setSearch(e.target.value);
                                     setPage(1);
                                 }}
-                                className="w-full sm:w-64 px-3 text-stone-400 py-1.5 text-sm rounded-md border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-stone-500/20 focus:border-stone-500"
+                                className="w-full sm:w-64 px-3 text-stone-400 py-1.5 text-base rounded-md border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-stone-500/20 focus:border-stone-500"
                             />
                         </div>
 

@@ -3,56 +3,68 @@
 import React, { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { MyButton } from "@/components/ui/MyButton"
-import { formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import { Spinner } from "@/components/ui/spinner"
-import { IconClipboardPlus, IconEdit, IconTrash } from "@tabler/icons-react"
+import { IconClipboardPlus } from "@tabler/icons-react"
 import Link from "next/link"
-import { DeleteConfirmDialog } from "@/components/ui/DeleteConfirmDialog"
 import ItemInputDialog from "@/components/ui/ItemInputDialog"
+
+import PlanHeaderCard from "@/components/layout/PlanHeader"
+import PlanItemCard from "@/components/layout/PlanItemCard"
 
 
 
 export default function PlanDetail() {
     const router = useRouter()
     const searchParams = useSearchParams()
+
     const [loading, setLoading] = useState(true);
     const [itemDialogOpen, setItemDialogOpen] = useState(false)
     const [itemLoading, setItemLoading] = useState(false)
-
     const [plan, setPlan] = useState(null)
+    const [items, setItems] = useState([])
+    const [expandedItemId, setExpandedItemId] = useState(null)
 
+    const loadPlan = async (id) => {
+        setLoading(true)
+        try {
+            const res = await fetch(`/api/plan/${id}`)
+            const data = await res.json()
 
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || "Failed to load plan")
+            }
+            setPlan(data.plan)
+            setItems(data.item || [])
+            // setExpandedItemId((prev) => prev || data.item?.[0]?.id || null)
+        } catch (err) {
+            toast.error("Failed to load plan", { description: err.message });
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
         const id = searchParams.get("id")
-
         if (!id) {
             setLoading(false)
             toast.error("Plan ID is missing")
             return
         }
-
-        const loadPlan = async () => {
-            setLoading(true)
-            try {
-                const res = await fetch(`/api/plan/${id}`)
-                const data = await res.json()
-
-                if (!res.ok || !data.success) {
-                    throw new Error(data.message || "Failed to load plan")
-                }
-
-                setPlan(data.plan)
-            } catch (err) {
-                toast.error("Failed to load plan", { description: err.message });
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        loadPlan()
+        loadPlan(id)
     }, [searchParams])
+
+    const handleItemEdit = (item) => {
+        toast.info("Item edit UI coming soon", {
+            description: item.description,
+        })
+    }
+
+    const handleItemDelete = (item) => {
+        toast.info("Item delete UI coming soon", {
+            description: item.description,
+        })
+    }
 
     const handleDelete = async (id_plan, id_user_plan) => {
         try {
@@ -88,7 +100,6 @@ export default function PlanDetail() {
             toast.error("Plan data is not ready")
             return
         }
-
         setItemLoading(true)
         try {
             const res = await fetch("/api/plan/item", {
@@ -103,7 +114,6 @@ export default function PlanDetail() {
                     status: "pending",
                 }),
             })
-
             const data = await res.json()
 
             if (!res.ok || !data.success) {
@@ -113,10 +123,11 @@ export default function PlanDetail() {
                         : "Failed to save item"
                 throw new Error(msg)
             }
-
             toast.success("Item added successfully")
             setItemDialogOpen(false)
-            router.refresh()
+            if (plan?.id) {
+                await loadPlan(plan.id)
+            }
         } catch (err) {
             toast.error("Failed to add item", { description: err.message })
         } finally {
@@ -125,90 +136,73 @@ export default function PlanDetail() {
     }
 
 
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-32 w-full gap-2">
+                <Spinner />
+            </div>
+        )
+    }
+
+    if (!plan) {
+        return (
+            <div className="flex flex-col items-center justify-center h-32 w-full gap-3 bg-white rounded-sm p-3">
+                <div className="text-sm text-stone-500">Plan data is not available.</div>
+                <Link href="/plan">
+                    <MyButton label="back" variant="primary" />
+                </Link>
+            </div>
+        )
+    }
+
     return (
         <div className="w-full">
-            {loading ? (
-                <div className="flex justify-center items-center h-32 gap-2">
-                    <Spinner />
-                </div>
-            ) : !plan ? (
-                <div className="flex flex-col items-center justify-center h-32 gap-3 bg-white rounded-sm p-3">
-                    <div className="text-sm text-stone-500">Plan data is not available.</div>
-                    <Link href="/plan">
-                        <MyButton
-                            label="back"
-                            variant="primary"
+            <div className="flex flex-col gap-2">
+                <PlanHeaderCard onDelete={handleDelete} plan={plan} />
 
-                        /></Link>
-                </div>
-            ) : (
-                <div className="flex flex-col gap-2">
-                    <div className="bg-white rounded-sm p-3 ">
-                        <div className="flex justify-between items-center border-b pb-2">
+                <div className="bg-white rounded-sm p-3 flex flex-col gap-5">
+                    <div className="flex">
+                        <ItemInputDialog
+                            trigger={<MyButton label="Add Activity" variant="success" icon={IconClipboardPlus} iconPosition="right" />}
+                            open={itemDialogOpen}
+                            onOpenChange={setItemDialogOpen}
+                            onSubmit={handleCreateItem}
+                            loading={itemLoading}
+                        />
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
                             <div>
-                                <h1 className="text-stone-400 font-bold">Detail Plan</h1></div>
-                            <div className="flex gap-2">
-                                <DeleteConfirmDialog
-                                    title="Delete Plan"
-                                    description="Are you sure you want to delete this plan?"
-                                    onConfirm={() => handleDelete(plan.id, plan.user.id)}
-                                    trigger={<MyButton iconOnly icon={IconTrash} variant="danger" />}
-                                />
-                                <Link href={`/plan/edit?id=${plan.id}`}>
-                                    <MyButton
-                                        icon={IconEdit}
-                                        variant="warning"
-                                        iconOnly
-                                    /></Link>
-                                <Link href="/plan">
-                                    <MyButton
-                                        label="back"
-                                        variant="primary"
-
-                                    /></Link>
+                                <h2 className="text-sm font-semibold text-stone-800">Plan Items</h2>
+                                <p className="text-xs text-stone-500">Click an item to see full details.</p>
                             </div>
+                            <div className="text-xs text-stone-400">{items.length} items</div>
                         </div>
-                        <div className="grid grid-cols-1 pt-2 gap-5">
-                            <div className="">
-                                <div className="text-base font-bold text-stone-900">{plan.title}</div>
-                                <div className="text-xs text-stone-500">{formatDate(plan.date, true)}</div>
+
+                        {items.length ? (
+                            <div className="grid grid-cols-1 gap-3">
+                                {items.map((item) => {
+                                    return (
+                                        <PlanItemCard
+                                            key={item.id}
+                                            item={item}
+                                            isExpanded={expandedItemId == item.id}
+                                            onToggle={() => setExpandedItemId((prev) => (prev === item.id ? null : item.id))}
+                                            onEdit={handleItemEdit}
+                                            onDelete={handleItemDelete}
+                                        />
+                                    )
+
+                                })}
                             </div>
-
-                            <div className="flex flex-col gap-2">
-                                <div className="">
-                                    <div className="text-xs text-stone-400">Assgined to</div>
-                                    <div className="">{plan.user?.name}</div>
-                                </div>
-                                <div className="">
-                                    <div className="text-xs text-stone-400">Branch</div>
-                                    <div>{plan.branch?.name}</div>
-                                </div>
-
+                        ) : (
+                            <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50 p-5 text-center text-sm text-stone-500">
+                                No activity item yet.
                             </div>
-                        </div>
-
-                        <div className="flex justify-between text-xs text-stone-400 pt-10 flex-wrap gap-2">
-                            <div>Total Task <span className="block text-lg text-stone-900">0</span></div>
-                            <div>Total Completed <span className="block text-lg text-green-900">0/0</span></div>
-                            <div>Total Points <span className="block text-lg text-blue-900">0</span></div>
-                        </div>
-
-                    </div>
-
-                    <div className="bg-white rounded-sm p-3 flex flex-col gap-5">
-                        <div className="flex">
-                            <ItemInputDialog
-                                trigger={<MyButton label="Add Activity" variant="success" icon={IconClipboardPlus} iconPosition="right" />}
-                                open={itemDialogOpen}
-                                onOpenChange={setItemDialogOpen}
-                                onSubmit={handleCreateItem}
-                                loading={itemLoading}
-                            />
-                        </div>
-                        <div className="">content</div>
+                        )}
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     )
 

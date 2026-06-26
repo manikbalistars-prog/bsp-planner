@@ -9,12 +9,16 @@ import { Spinner } from "@/components/ui/spinner"
 import { IconClipboardPlus, IconEdit, IconTrash } from "@tabler/icons-react"
 import Link from "next/link"
 import { DeleteConfirmDialog } from "@/components/ui/DeleteConfirmDialog"
+import ItemInputDialog from "@/components/ui/ItemInputDialog"
+
 
 
 export default function PlanDetail() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [loading, setLoading] = useState(true);
+    const [itemDialogOpen, setItemDialogOpen] = useState(false)
+    const [itemLoading, setItemLoading] = useState(false)
 
     const [plan, setPlan] = useState(null)
 
@@ -76,6 +80,47 @@ export default function PlanDetail() {
             router.push("/plan");
         } catch (err) {
             toast.error("Something went wrong", { description: `${err}` });
+        }
+    }
+
+    const handleCreateItem = async ({ time, description }) => {
+        if (!plan?.id || !plan?.user?.id) {
+            toast.error("Plan data is not ready")
+            return
+        }
+
+        setItemLoading(true)
+        try {
+            const res = await fetch("/api/plan/item", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id_plan: plan.id,
+                    time,
+                    description,
+                    status: "pending",
+                }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok || !data.success) {
+                const msg =
+                    data.message === "Unauthorized"
+                        ? "You dont have access to add this"
+                        : "Failed to save item"
+                throw new Error(msg)
+            }
+
+            toast.success("Item added successfully")
+            setItemDialogOpen(false)
+            router.refresh()
+        } catch (err) {
+            toast.error("Failed to add item", { description: err.message })
+        } finally {
+            setItemLoading(false)
         }
     }
 
@@ -152,7 +197,13 @@ export default function PlanDetail() {
 
                     <div className="bg-white rounded-sm p-3 flex flex-col gap-5">
                         <div className="flex">
-                            <MyButton label="add task" variant="success" icon={IconClipboardPlus} iconPosition="right" />
+                            <ItemInputDialog
+                                trigger={<MyButton label="Add Activity" variant="success" icon={IconClipboardPlus} iconPosition="right" />}
+                                open={itemDialogOpen}
+                                onOpenChange={setItemDialogOpen}
+                                onSubmit={handleCreateItem}
+                                loading={itemLoading}
+                            />
                         </div>
                         <div className="">content</div>
                     </div>

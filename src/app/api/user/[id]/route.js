@@ -1,22 +1,13 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { supabase } from "@/lib/supabase";
 import { findUserByUsername } from "@/repositories/user.repository";
+import { requireApiAdmin } from "@/lib/api-auth";
 
 export async function PUT(req, { params }) {
   try {
-    
-    const token = req.cookies.get("session")?.value;
-    if (!token) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
-
-   
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded.isAdmin) {
-      return NextResponse.json({ success: false, message: "Forbidden bruh!" }, { status: 403 });
-    }
+    const { error: authError } = requireApiAdmin(req);
+    if (authError) return authError;
 
     const { id } = await params; 
     const body = await req.json();
@@ -56,27 +47,14 @@ export async function PUT(req, { params }) {
 
     return NextResponse.json({ success: true, data });
   } catch (err) {
-    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
-      return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
-    }
-   
     return NextResponse.json({ success: false, message: err.message || "Internal Server Error" }, { status: 500 });
   }
 }
 
 export async function DELETE(req, { params }) {
   try {
- 
-    const token = req.cookies.get("session")?.value;
-    if (!token) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
-
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded.isAdmin) {
-      return NextResponse.json({ success: false, message: "Forbidden bruh! only admin" }, { status: 403 });
-    }
+    const { error: authError } = requireApiAdmin(req);
+    if (authError) return authError;
 
     const { id } = await params; 
     const { data, error } = await supabase
@@ -94,10 +72,6 @@ export async function DELETE(req, { params }) {
       data 
     });
   } catch (err) {
-    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
-      return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
-    }
-   
     return NextResponse.json({ success: false, message: err.message || "Internal Server Error" }, { status: 500 });
   }
 }

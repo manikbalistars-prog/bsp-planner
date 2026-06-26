@@ -1,27 +1,12 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
-
+import { requireApiSession } from "@/lib/api-auth";
 
 import { createPlan, getAllPlans } from "@/repositories/plan.repository";
 
 export const POST = async (req) => {
     try {
-        const token = req.cookies.get("session")?.value;
-
-        if (!token) {
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-
-        let payload;
-
-        try {
-            payload = jwt.verify(token, process.env.JWT_SECRET);
-        } catch (error) {
-            return NextResponse.json(
-                { success: false, message: "Invalid or expired session" },
-                { status: 401 }
-            );
-        }
+        const { user: payload, error: authError } = requireApiSession(req);
+        if (authError) return authError;
 
         const body = await req.json();
 
@@ -47,13 +32,8 @@ export const POST = async (req) => {
 
 export const GET = async (req) => {
     try {
-
-        const token = req.cookies.get("session")?.value;
-        if (!token) {
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const { user: decoded, error: authError } = requireApiSession(req);
+        if (authError) return authError;
 
         const { searchParams } = new URL(req.url);
         const page = Number(searchParams.get("page")) || 1;

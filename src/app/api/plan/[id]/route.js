@@ -1,16 +1,13 @@
 import { getPlanById, updatePlan, deletePlan } from "@/repositories/plan.repository";
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { requireApiSession } from "@/lib/api-auth";
 
 export const GET = async (req, { params }) => {
     try {
-        const token = req.cookies.get("session")?.value;
-        if (!token) {
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-
         const resolvedParams = await params;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const { user: decoded, error: authError } = requireApiSession(req);
+        if (authError) return authError;
+
         const plan = await getPlanById(resolvedParams.id);
 
         const isOwner = decoded.isAdmin || decoded.role?.role === "owner";
@@ -32,19 +29,8 @@ export const GET = async (req, { params }) => {
 
 export const PUT = async (req) => {
     try {
-
-        const token = req.cookies.get("session")?.value;
-        if (!token) {
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        try {
-            jwt.verify(token, process.env.JWT_SECRET);
-        } catch (error) {
-            return NextResponse.json({ success: false, message: "Invalid session" }, { status: 401 });
-        }
+        const { user: decoded, error: authError } = requireApiSession(req);
+        if (authError) return authError;
 
         const body = await req.json();
         const { id, id_user, id_branch, ...updateData } = body;
@@ -76,24 +62,8 @@ export const PUT = async (req) => {
 
 export async function DELETE(req) {
     try {
-        const token = req.cookies.get("session")?.value;
-        if (!token) {
-            return NextResponse.json(
-                { success: false, message: "Unauthorized" },
-                { status: 401 },
-            );
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        try {
-            jwt.verify(token, process.env.JWT_SECRET);
-        } catch (error) {
-            return NextResponse.json(
-                { success: false, message: "Invalid session" },
-                { status: 401 },
-            );
-        }
+        const { user: decoded, error: authError } = requireApiSession(req);
+        if (authError) return authError;
 
         const body = await req.json();
         const { id_plan, id_user_plan } = body;

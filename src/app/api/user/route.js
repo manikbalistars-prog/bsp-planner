@@ -1,8 +1,8 @@
 
 import { NextResponse } from "next/server";
 import { getUsersPaginated, createUser, findUserByUsername } from "@/repositories/user.repository";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { requireApiAdmin } from "@/lib/api-auth";
 
 export async function GET(req) {
   try {
@@ -21,18 +21,9 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const token = req.cookies.get("session")?.value
+    const { error: authError } = requireApiAdmin(req);
+    if (authError) return authError;
 
-    if (!token) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-
-    if (!decoded.isAdmin) {
-      return NextResponse.json({ success: false, message: "Forbidden bruh! only admin" }, { status: 403 });
-    }
     const body = await req.json();
 
     const existingUser = await findUserByUsername(body.username);
@@ -60,11 +51,6 @@ export async function POST(req) {
       data: user,
     });
   } catch (err) {
-
-    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
-      return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
-    }
-    // console.error("Error create user:", err);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
 }

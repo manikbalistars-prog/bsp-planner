@@ -24,6 +24,7 @@ export default function PlanDetail() {
     const [plan, setPlan] = useState(null)
     const [items, setItems] = useState([])
     const [expandedItemId, setExpandedItemId] = useState(null)
+    const [editingItem, setEditingItem] = useState(null)
 
     const loadPlan = async (id) => {
         setLoading(true)
@@ -55,15 +56,43 @@ export default function PlanDetail() {
     }, [searchParams])
 
     const handleItemEdit = (item) => {
-        toast.info("Item edit UI coming soon", {
-            description: item.description,
-        })
+        setEditingItem(item)
+        setItemDialogOpen(true)
     }
 
-    const handleItemDelete = (item) => {
-        toast.info("Item delete UI coming soon", {
-            description: item.description,
-        })
+    const handleItemDelete = async (item) => {
+        try {
+            const res = await fetch(`/api/plan/item/${item.id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: item.id,
+                    id_user_plan: plan.user.id,
+                }),
+            });
+            const data = await res.json();
+
+            const msg =
+                data.message === "Unauthorized"
+                    ? "You dont have access to delete this"
+                    : "Fail to delete data!";
+            if (!res.ok) {
+                toast.error(msg, { description: `error : ${data.message}` });
+                return;
+            }
+            toast.success(`Data success deleted!`);
+
+            setItems((prevItems) => prevItems.filter((i) => i.id !== item.id));
+
+            if (expandedItemId === item.id) {
+                setExpandedItemId(null);
+            }
+
+        } catch (err) {
+            toast.error("Something went wrong", { description: `${err}` });
+        }
     }
 
     const handleDelete = async (id_plan, id_user_plan) => {
@@ -125,14 +154,64 @@ export default function PlanDetail() {
             }
             toast.success("Item added successfully")
             setItemDialogOpen(false)
-            if (plan?.id) {
-                await loadPlan(plan.id)
+            if (data.item) {
+                setItems((prevItems) => {
+                    const updatedItems = [...prevItems, data.item];
+
+                    return updatedItems.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+                });
             }
         } catch (err) {
             toast.error("Failed to add item", { description: err.message })
         } finally {
             setItemLoading(false)
         }
+    }
+
+    const handleUpdateItem = async ({ time, description }) => {
+        if (!editingItem?.id || !plan?.user?.id) return
+
+        setItemLoading(true)
+        try {
+            const res = await fetch(`/api/plan/item/${editingItem.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: editingItem.id,
+                    id_user_plan: plan.user.id,
+                    time,
+                    description,
+                }),
+            })
+            const data = await res.json()
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || "Failed to update item")
+            }
+
+            toast.success("Item updated successfully")
+            setItemDialogOpen(false)
+            setEditingItem(null)
+            setItems((prevItems) => {
+                const updatedItems = prevItems.map((item) => {
+                    if (item.id === editingItem.id) {
+                        return { ...item, time, description };
+                    }
+                    return item;
+                });
+
+                return updatedItems.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+            });
+        } catch (err) {
+            toast.error("Failed to update item", { description: err.message })
+        } finally {
+            setItemLoading(false)
+        }
+    }
+
+    const handleOpenAddDialog = () => {
+        setEditingItem(null)
+        setItemDialogOpen(true)
     }
 
 
@@ -163,10 +242,16 @@ export default function PlanDetail() {
                 <div className="bg-white rounded-sm p-3 flex flex-col gap-5">
                     <div className="flex">
                         <ItemInputDialog
-                            trigger={<MyButton label="Add Activity" variant="success" icon={IconClipboardPlus} iconPosition="right" />}
+                            trigger={<MyButton label="Add Activity" variant="success" icon={IconClipboardPlus} iconPosition="right" onClick={handleOpenAddDialog} />}
+                            title={editingItem ? "Edit Item" : "Add Item"}
+                            subtitle={editingItem ? "Modify item time and description." : "Fill item time and description."}
+                            initialValues={editingItem ? { time: editingItem.time?.slice(0, 5), description: editingItem.description } : null}
                             open={itemDialogOpen}
-                            onOpenChange={setItemDialogOpen}
-                            onSubmit={handleCreateItem}
+                            onOpenChange={(open) => {
+                                setItemDialogOpen(open)
+                                if (!open) setEditingItem(null)
+                            }}
+                            onSubmit={editingItem ? handleUpdateItem : handleCreateItem}
                             loading={itemLoading}
                         />
                     </div>

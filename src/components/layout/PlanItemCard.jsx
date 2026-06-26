@@ -2,6 +2,7 @@ import React from "react"
 import { MyButton } from "@/components/ui/MyButton"
 import { formatDate } from "@/lib/utils"
 import { IconClock, IconEdit, IconTrash } from "@tabler/icons-react"
+import { DeleteConfirmDialog } from "../ui/DeleteConfirmDialog"
 
 const getStatusStyles = (status) => {
     switch (status) {
@@ -47,11 +48,16 @@ export default function PlanItemCard({ item, isExpanded, onToggle, onEdit, onDel
                         variant="warning"
                         onClick={() => onEdit(item)}
                     />
-                    <MyButton
-                        iconOnly
-                        icon={IconTrash}
-                        variant="danger"
-                        onClick={() => onDelete(item)}
+                    <DeleteConfirmDialog
+                        title="Delete User"
+                        description="Are you sure you want to delete this?"
+                        onConfirm={() => onDelete(item)}
+                        trigger={<MyButton
+                            iconOnly
+                            icon={IconTrash}
+                            variant="danger"
+
+                        />}
                     />
                 </div>
             </div>

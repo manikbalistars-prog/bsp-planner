@@ -22,7 +22,7 @@ export async function middleware(req) {
 
     return NextResponse.next();
   } catch (err) {
-    console.error("JWT ERROR:", err);
+  
     const response = NextResponse.redirect(
       new URL("/login?error=session_invalid", req.url)
     );

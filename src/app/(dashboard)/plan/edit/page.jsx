@@ -1,5 +1,6 @@
 import PlannerFormClient from "@/app/(dashboard)/plan/PlannerFormClient"
 import { getPlanById } from "@/repositories/plan.repository"
+import { toast } from "sonner";
 
 export default async function EditPlan({ searchParams }) {
     const resolvedSearchParams = await searchParams;
@@ -20,7 +21,7 @@ export default async function EditPlan({ searchParams }) {
                 area: rawObj.branch?.area?.area
             };
         } catch (error) {
-            console.error("Failed to load plan", error);
+            toast.error("Failed to load plan", error);
         }
     } else if (resolvedSearchParams.data) {
         try {
@@ -36,7 +37,7 @@ export default async function EditPlan({ searchParams }) {
                 area: rawObj.a
             };
         } catch (error) {
-            console.error("Failed to read legacy plan data", error);
+            toast.error("Failed to read legacy plan data", error);
         }
     }
     return <PlannerFormClient currentPlan={planObj} />;

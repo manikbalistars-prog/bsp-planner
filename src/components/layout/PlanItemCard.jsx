@@ -2,9 +2,12 @@ import React, { useState } from "react"
 import { MyButton } from "@/components/ui/MyButton"
 import { formatDate } from "@/lib/utils"
 import { toast } from "sonner"
-import { Spinner } from "@/components/ui/spinner"
-import { IconClock, IconEdit, IconTrash, IconPhoto, IconX } from "@tabler/icons-react"
+import { IconClock, IconEdit, IconTrash } from "@tabler/icons-react"
 import { DeleteConfirmDialog } from "../ui/DeleteConfirmDialog"
+import imageCompression from "browser-image-compression"
+
+import PhotoSelector from "@/components/ui/PhotoSelector"
+
 
 const getStatusStyles = (status) => {
     switch (status) {
@@ -24,15 +27,54 @@ const getStatusLabel = (status) => {
     }
 }
 
-export default function PlanItemCard({ item, isExpanded, onToggle, onEdit, onDelete, onRefresh }) {
+export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle, onEdit, onDelete, onRefresh }) {
     const [uploadingBefore, setUploadingBefore] = useState(false)
     const [uploadingAfter, setUploadingAfter] = useState(false)
+
+    const [tempBeforeFile, setTempBeforeFile] = useState(null)
+    const [tempAfterFile, setTempAfterFile] = useState(null)
+    const [previewBefore, setPreviewBefore] = useState(null)
+    const [previewAfter, setPreviewAfter] = useState(null)
+
 
     const imageBefore = item.images?.find(img => img.image_type === 'before') || null
     const imageAfter = item.images?.find(img => img.image_type === 'after') || null
 
-    const handlePhotoUpload = async (e, type) => {
+
+    const handleFileChange = async (e, type) => {
         const file = e.target.files?.[0]
+        if (!file) return
+
+        const toastId = toast.loading("Compressing image...")
+
+        const options = {
+            maxSizeMB: 0.4,
+            maxWidthOrHeight: 1200,
+            useWebWorker: true,
+            fileType: "image/webp"
+        }
+
+        try {
+
+            const compressedFile = await imageCompression(file, options)
+
+            const objectUrl = URL.createObjectURL(compressedFile)
+            if (type === 'before') {
+                setTempBeforeFile(compressedFile)
+                setPreviewBefore(objectUrl)
+            } else {
+                setTempAfterFile(compressedFile)
+                setPreviewAfter(objectUrl)
+            }
+
+            toast.success("Image optimized successfully", { id: toastId })
+        } catch (error) {
+            toast.error("Failed to compress image", { id: toastId })
+        }
+    }
+
+    const handlePhotoUpload = async (type) => {
+        const file = type === 'before' ? tempBeforeFile : tempAfterFile
         if (!file) return
 
         if (type === 'before') setUploadingBefore(true)
@@ -40,6 +82,7 @@ export default function PlanItemCard({ item, isExpanded, onToggle, onEdit, onDel
 
         try {
             const formData = new FormData()
+            formData.append('id_user_plan', id_user_plan)
             formData.append("file", file)
             formData.append("id_item", item.id)
             formData.append("image_type", type)
@@ -50,15 +93,39 @@ export default function PlanItemCard({ item, isExpanded, onToggle, onEdit, onDel
             })
 
             const data = await res.json()
-            if (!res.ok || !data.success) throw new Error(data.message || "Failed to upload image")
-
+            const msg =
+                data.message === "Unauthorized"
+                    ? "You dont have access to upload here"
+                    : "Fail to upload image!";
+            if (!res.ok) {
+                toast.error(msg, { description: `error : ${data.message}` });
+                return;
+            }
             toast.success(`Photo ${type} uploaded successfully`)
+
+            if (type === 'before') {
+                setTempBeforeFile(null)
+                setPreviewBefore(null)
+            } else {
+                setTempAfterFile(null)
+                setPreviewAfter(null)
+            }
             if (onRefresh) onRefresh()
         } catch (err) {
             toast.error("Upload failed", { description: err.message })
         } finally {
             setUploadingBefore(false)
             setUploadingAfter(false)
+        }
+    }
+
+    const handleCancelTemp = (type) => {
+        if (type === 'before') {
+            setTempBeforeFile(null)
+            setPreviewBefore(null)
+        } else {
+            setTempAfterFile(null)
+            setPreviewAfter(null)
         }
     }
 
@@ -71,13 +138,21 @@ export default function PlanItemCard({ item, isExpanded, onToggle, onEdit, onDel
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    id_user_plan: id_user_plan,
                     id_item: item.id,
                     image_type: type
                 })
             })
 
             const data = await res.json()
-            if (!res.ok || !data.success) throw new Error(data.message || "Failed to delete image")
+            const msg =
+                data.message === "Unauthorized"
+                    ? "You dont have access to delete this"
+                    : "Fail to delete image!";
+            if (!res.ok) {
+                toast.error(msg, { description: `error : ${data.message}` });
+                return;
+            }
 
             toast.success(`Photo ${type} deleted successfully`)
             if (onRefresh) onRefresh()
@@ -162,66 +237,35 @@ export default function PlanItemCard({ item, isExpanded, onToggle, onEdit, onDel
                                         {item.marked_at ? formatDate(item.marked_at, true) : "Not marked yet"}
                                     </div>
                                 </div>
-                        
-
                                 <div className="rounded-xl bg-stone-50 p-4">
                                     <div className="text-xs text-stone-400 mb-2">Documentation Photos</div>
+                                    <div className="grid grid-cols-1 gap-4">
 
-                                    <div className="grid grid-cols-1 gap-3">
-                                
-                                        <div className="space-y-1">
-                                            <span className="text-[10px] font-medium text-stone-500 uppercase tracking-wider block">Before</span>
-                                            <label className="relative flex flex-col items-center justify-center aspect-video rounded-lg border border-dashed border-stone-300 bg-white hover:bg-stone-50/50 cursor-pointer overflow-hidden group transition-all">
-                                                {uploadingBefore ? (
-                                                    <Spinner className="w-5 h-5 text-stone-400" />
-                                                ) : imageBefore ? (
-                                                    <>
-                                                        <img src={imageBefore.image_path} alt="Before" className="w-full h-full object-cover absolute inset-0" />
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => { e.preventDefault(); handlePhotoDelete('before'); }}
-                                                            className="absolute top-1.5 right-1.5 p-1 bg-rose-500 hover:bg-rose-600 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                                        >
-                                                            <IconX className="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <div className="flex flex-col items-center gap-1 p-2 text-center">
-                                                        <IconPhoto className="w-5 h-5 text-stone-400 group-hover:text-stone-500" />
-                                                        <span className="text-[11px] text-stone-500 font-medium">Upload</span>
-                                                    </div>
-                                                )}
-                                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoUpload(e, 'before')} disabled={uploadingBefore} />
-                                            </label>
-                                        </div>
+                                        <PhotoSelector
+                                            type="before"
+                                            savedImage={imageBefore}
+                                            previewUrl={previewBefore}
+                                            isUploading={uploadingBefore}
+                                            onFileChange={handleFileChange}
+                                            onUpload={handlePhotoUpload}
+                                            onCancel={handleCancelTemp}
+                                            onDelete={handlePhotoDelete}
+                                            itemId={item.id}
+                                        />
 
-                                        
-                                        <div className="space-y-1">
-                                            <span className="text-[10px] font-medium text-stone-500 uppercase tracking-wider block">After</span>
-                                            <label className="relative flex flex-col items-center justify-center aspect-video rounded-lg border border-dashed border-stone-300 bg-white hover:bg-stone-50/50 cursor-pointer overflow-hidden group transition-all">
-                                                {uploadingAfter ? (
-                                                    <Spinner className="w-5 h-5 text-stone-400" />
-                                                ) : imageAfter ? (
-                                                    <>
-                                                        <img src={imageAfter.image_path} alt="After" className="w-full h-full object-cover absolute inset-0" />
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => { e.preventDefault(); handlePhotoDelete('after'); }}
-                                                            className="absolute top-1.5 right-1.5 p-1 bg-rose-500 hover:bg-rose-600 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                                        >
-                                                            <IconX className="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <div className="flex flex-col items-center gap-1 p-2 text-center">
-                                                        <IconPhoto className="w-5 h-5 text-stone-400 group-hover:text-stone-500" />
-                                                        <span className="text-[11px] text-stone-500 font-medium">Upload</span>
-                                                    </div>
-                                                )}
-                                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoUpload(e, 'after')} disabled={uploadingAfter} />
-                                            </label>
-                                        </div>
+                                        <PhotoSelector
+                                            type="after"
+                                            savedImage={imageAfter}
+                                            previewUrl={previewAfter}
+                                            isUploading={uploadingAfter}
+                                            onFileChange={handleFileChange}
+                                            onUpload={handlePhotoUpload}
+                                            onCancel={handleCancelTemp}
+                                            onDelete={handlePhotoDelete}
+                                            itemId={item.id}
+                                        />
                                     </div>
+
                                 </div>
                             </div>
                         </div>

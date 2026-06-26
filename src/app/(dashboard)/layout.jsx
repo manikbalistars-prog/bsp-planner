@@ -30,7 +30,7 @@ function DashboardLayoutContent({ children }) {
 
                 setUser(data.user);
             } catch (err) {
-                console.error(err);
+                toast.error(err);
             } finally {
                 setLayoutLoading(false);
             }

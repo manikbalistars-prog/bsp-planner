@@ -37,7 +37,6 @@ export default function PlanDetail() {
             }
             setPlan(data.plan)
             setItems(data.plan.items || [])
-            // setExpandedItemId((prev) => prev || data.item?.[0]?.id || null)
         } catch (err) {
             toast.error("Failed to load plan", { description: err.message });
         } finally {
@@ -271,6 +270,7 @@ export default function PlanDetail() {
                                         <PlanItemCard
                                             key={item.id}
                                             item={item}
+                                            id_user_plan={plan.user.id}
                                             isExpanded={expandedItemId == item.id}
                                             onToggle={() => setExpandedItemId((prev) => (prev === item.id ? null : item.id))}
                                             onEdit={handleItemEdit}

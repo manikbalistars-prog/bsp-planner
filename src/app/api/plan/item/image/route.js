@@ -9,9 +9,16 @@ export const POST = async (req) => {
 
         
         const formData = await req.formData();
+        
         const file = formData.get("file"); 
         const id_item = formData.get("id_item");
         const image_type = formData.get("image_type"); 
+        
+        
+        const id_user_plan = formData.get("id_user_plan"); 
+         if (id_user_plan != user.id) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
 
         if (!file || !id_item || !image_type) {
             return NextResponse.json({ success: false, message: "File, id_item, and image_type are required" }, { status: 400 });
@@ -63,7 +70,11 @@ export const DELETE = async (req) => {
         if (authError) return authError;
 
         const body = await req.json();
-        const { id_item, image_type } = body; 
+        const {id_user_plan, id_item, image_type } = body; 
+
+        if (id_user_plan != user.id) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
 
         if (!id_item || !image_type) {
             return NextResponse.json({ success: false, message: "id_item and image_type are required" }, { status: 400 });

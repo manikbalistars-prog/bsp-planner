@@ -9,9 +9,9 @@ export const createPlan = async (obj) => {
 }
 
 export const getPlanById = async (id) => {
-        const { data, error } = await supabase
-                .from("plan")
-                .select(`
+    const { data, error } = await supabase
+        .from("plan")
+        .select(`
             id,
             title,
             date,
@@ -30,14 +30,16 @@ export const getPlanById = async (id) => {
                     id,
                     area
                 )
-            )
+            ),
+            items: plan_item(*, images: plan_images(*))
+                
         `)
-                .eq("id", id)
-                .single();
+        .eq("id", id).order('time', { foreignTable: 'plan_item', ascending: true })
+        .single();
 
-        if (error) throw error;
+    if (error) throw error;
 
-        return data;
+    return data;
 };
 
 export const getAllPlans = async ({
@@ -47,15 +49,15 @@ export const getAllPlans = async ({
     showAll = false,
     areaGroup = false,
     id_user,
-    area 
+    area
 }) => {
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    
-    const branchRelation = areaGroup && !showAll 
-        ? 'branch:id_branch!inner(id, name, area:id_area!inner(id, area))' 
+
+    const branchRelation = areaGroup && !showAll
+        ? 'branch:id_branch!inner(id, name, area:id_area!inner(id, area))'
         : 'branch:id_branch(id, name, area:id_area(id, area))';
 
     let query = supabase
@@ -131,7 +133,7 @@ export const updatePlan = async (id, updateData) => {
     const { data, error } = await supabase
         .from("plan")
         .update(updateData)
-        .eq("id", id)        
+        .eq("id", id)
         .select()
         .single();
 

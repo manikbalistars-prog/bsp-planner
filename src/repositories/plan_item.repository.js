@@ -10,7 +10,14 @@ export const createPlanItem = async (payload) => {
 
 export const getItemByPlanId = async (id) => {
     const { data, error } = await supabase.from('plan_item').select(
-        `*`
+        `*,
+        plan_images (
+                id,
+                created_at,
+                id_item,
+                image_path,
+                image_type
+            )`
     ).eq('id_plan', id).order('time', { ascending: true })
 
     if (error) throw error

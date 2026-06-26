@@ -36,7 +36,7 @@ export default function PlanDetail() {
                 throw new Error(data.message || "Failed to load plan")
             }
             setPlan(data.plan)
-            setItems(data.item || [])
+            setItems(data.plan.items || [])
             // setExpandedItemId((prev) => prev || data.item?.[0]?.id || null)
         } catch (err) {
             toast.error("Failed to load plan", { description: err.message });
@@ -275,6 +275,7 @@ export default function PlanDetail() {
                                             onToggle={() => setExpandedItemId((prev) => (prev === item.id ? null : item.id))}
                                             onEdit={handleItemEdit}
                                             onDelete={handleItemDelete}
+                                            onRefresh={() => loadPlan(plan.id)}
                                         />
                                     )
 

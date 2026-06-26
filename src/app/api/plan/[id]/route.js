@@ -1,6 +1,7 @@
 import { getPlanById, updatePlan, deletePlan } from "@/repositories/plan.repository";
 import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/api-auth";
+import { getItemByPlanId } from "@/repositories/plan_item.repository";
 
 export const GET = async (req, { params }) => {
     try {
@@ -8,7 +9,11 @@ export const GET = async (req, { params }) => {
         const { user: decoded, error: authError } = requireApiSession(req);
         if (authError) return authError;
 
-        const plan = await getPlanById(resolvedParams.id);
+        const [plan, item] = await Promise.all([
+            getPlanById(resolvedParams.id),
+            getItemByPlanId(resolvedParams.id)
+
+        ])
 
         const isOwner = decoded.isAdmin || decoded.role?.role === "owner";
         const isSameUser = plan.user?.id === decoded.id;
@@ -18,7 +23,7 @@ export const GET = async (req, { params }) => {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
-        return NextResponse.json({ success: true, plan });
+        return NextResponse.json({ success: true, plan, item });
     } catch (error) {
         return NextResponse.json(
             { success: false, message: error.message },

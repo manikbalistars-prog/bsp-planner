@@ -6,3 +6,13 @@ export const createPlanItem = async (payload) => {
     if (error) throw error
     return data
 }
+
+
+export const getItemByPlanId = async (id) => {
+    const { data, error } = await supabase.from('plan_item').select(
+        `*`
+    ).eq('id_plan', id)
+
+    if (error) throw error
+    return data
+}

@@ -12,7 +12,9 @@ import { useRouter } from "next/navigation"
 
 
 export default function Plan() {
-    const { curentUser } = useAuth()
+    const { currentUser } = useAuth()
+
+
 
     const router = useRouter()
 
@@ -75,7 +77,8 @@ export default function Plan() {
             <div className="bg-white p-3 rounded-lg  flex flex-col justify-between ">
                 <div className="flex justify-between">
                     <p className="font-semibold text-stone-600">All Plans</p>
-                    <Link href="/plan/create"><MyButton label="Create Plan" variant="success"></MyButton></Link>
+                    {currentUser.role?.role == "kepala cabang" && (
+                        <Link href="/plan/create"><MyButton label="Create Plan" variant="success"></MyButton></Link>)}
                 </div>
 
                 <div className="flex justify-between items-end">

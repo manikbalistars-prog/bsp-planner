@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { IconClipboardPlus } from "@tabler/icons-react"
 import Link from "next/link"
 import ItemInputDialog from "@/components/ui/ItemInputDialog"
+import { useAuth } from "@/context/AuthContext"
 
 import PlanHeaderCard from "@/components/layout/PlanHeader"
 import PlanItemCard from "@/components/layout/PlanItemCard"
@@ -15,6 +16,8 @@ import PlanItemCard from "@/components/layout/PlanItemCard"
 
 
 export default function PlanDetail() {
+    const { currentUser } = useAuth()
+
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -236,24 +239,26 @@ export default function PlanDetail() {
     return (
         <div className="w-full">
             <div className="flex flex-col gap-2">
-                <PlanHeaderCard onDelete={handleDelete} plan={plan} />
+                <PlanHeaderCard onDelete={handleDelete} plan={plan} showAction={currentUser.role?.role == "kepala cabang"} />
 
                 <div className="bg-white rounded-sm p-3 flex flex-col gap-5">
-                    <div className="flex">
-                        <ItemInputDialog
-                            trigger={<MyButton label="Add Activity" variant="success" icon={IconClipboardPlus} iconPosition="right" onClick={handleOpenAddDialog} />}
-                            title={editingItem ? "Edit Item" : "Add Item"}
-                            subtitle={editingItem ? "Modify item time and description." : "Fill item time and description."}
-                            initialValues={editingItem ? { time: editingItem.time?.slice(0, 5), description: editingItem.description } : null}
-                            open={itemDialogOpen}
-                            onOpenChange={(open) => {
-                                setItemDialogOpen(open)
-                                if (!open) setEditingItem(null)
-                            }}
-                            onSubmit={editingItem ? handleUpdateItem : handleCreateItem}
-                            loading={itemLoading}
-                        />
-                    </div>
+                    {currentUser.role?.role == "kepala cabang" && (
+                        <div className="flex">
+                            <ItemInputDialog
+                                trigger={<MyButton label="Add Activity" variant="success" icon={IconClipboardPlus} iconPosition="right" onClick={handleOpenAddDialog} />}
+                                title={editingItem ? "Edit Item" : "Add Item"}
+                                subtitle={editingItem ? "Modify item time and description." : "Fill item time and description."}
+                                initialValues={editingItem ? { time: editingItem.time?.slice(0, 5), description: editingItem.description } : null}
+                                open={itemDialogOpen}
+                                onOpenChange={(open) => {
+                                    setItemDialogOpen(open)
+                                    if (!open) setEditingItem(null)
+                                }}
+                                onSubmit={editingItem ? handleUpdateItem : handleCreateItem}
+                                loading={itemLoading}
+                            />
+                        </div>
+                    )}
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                             <div>
@@ -276,6 +281,8 @@ export default function PlanDetail() {
                                             onEdit={handleItemEdit}
                                             onDelete={handleItemDelete}
                                             onRefresh={() => loadPlan(plan.id)}
+
+                                            showAction={currentUser.role?.role == "kepala cabang"}
                                         />
                                     )
 

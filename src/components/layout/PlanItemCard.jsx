@@ -29,7 +29,7 @@ const getStatusLabel = (status) => {
     }
 }
 
-export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle, onEdit, onDelete, onRefresh }) {
+export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle, onEdit, onDelete, onRefresh, showAction }) {
 
     const router = useRouter()
     const [uploadingBefore, setUploadingBefore] = useState(false)
@@ -217,25 +217,27 @@ export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle,
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <MyButton
-                        iconOnly
-                        icon={IconEdit}
-                        variant="warning"
-                        onClick={() => onEdit(item)}
-                    />
-                    <DeleteConfirmDialog
-                        title="Delete User"
-                        description="Are you sure you want to delete this?"
-                        onConfirm={() => onDelete(item)}
-                        trigger={<MyButton
+                {showAction && (
+                    <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <MyButton
                             iconOnly
-                            icon={IconTrash}
-                            variant="danger"
+                            icon={IconEdit}
+                            variant="warning"
+                            onClick={() => onEdit(item)}
+                        />
+                        <DeleteConfirmDialog
+                            title="Delete User"
+                            description="Are you sure you want to delete this?"
+                            onConfirm={() => onDelete(item)}
+                            trigger={<MyButton
+                                iconOnly
+                                icon={IconTrash}
+                                variant="danger"
 
-                        />}
-                    />
-                </div>
+                            />}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="px-4 pb-4 pt-1">
@@ -288,6 +290,7 @@ export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle,
                                             onCancel={handleCancelTemp}
                                             onDelete={handlePhotoDelete}
                                             itemId={item.id}
+                                            showAction={showAction}
                                         />
 
                                         <PhotoSelector
@@ -300,21 +303,24 @@ export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle,
                                             onCancel={handleCancelTemp}
                                             onDelete={handlePhotoDelete}
                                             itemId={item.id}
+                                            showAction={showAction}
                                         />
                                     </div>
 
                                 </div>
 
-                                <div className="rounded-xl bg-stone-50 p-4">
-                                    <div className="text-xs text-stone-400">
-                                        {isLoading ? <div className="flex gap-2">Changing status <span><Spinner /></span></div> : <div>Change Status</div>}
+                                {!showAction && (
+                                    <div className="rounded-xl bg-stone-50 p-4">
+                                        <div className="text-xs text-stone-400">
+                                            {isLoading ? <div className="flex gap-2">Changing status <span><Spinner /></span></div> : <div>Change Status</div>}
+                                        </div>
+                                        <div className="flex h-fit gap-2 pt-2">
+                                            <MyButton iconOnly icon={IconCheck} variant={item.status == "completed" || isLoading ? "disable" : "success"} onClick={() => handleUpdateStatus('completed')} />
+                                            <MyButton iconOnly icon={IconX} variant={item.status == "uncompleted" || isLoading ? "disable" : "danger"} onClick={() => handleUpdateStatus('uncompleted')} />
+                                            <MyButton iconOnly icon={IconClock} variant={item.status == "pending" || isLoading ? "disable" : "warning"} onClick={() => handleUpdateStatus('pending')} />
+                                        </div>
                                     </div>
-                                    <div className="flex h-fit gap-2 pt-2">
-                                        <MyButton iconOnly icon={IconCheck} variant={item.status == "completed" || isLoading ? "disable" : "success"} onClick={() => handleUpdateStatus('completed')} />
-                                        <MyButton iconOnly icon={IconX} variant={item.status == "uncompleted" || isLoading ? "disable" : "danger"} onClick={() => handleUpdateStatus('uncompleted')} />
-                                        <MyButton iconOnly icon={IconClock} variant={item.status == "pending" || isLoading ? "disable" : "warning"} onClick={() => handleUpdateStatus('pending')} />
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>

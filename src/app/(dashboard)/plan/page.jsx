@@ -10,11 +10,18 @@ import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 
 import { useRouter } from "next/navigation"
 
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from "@/components/ui/combobox";
+
 
 export default function Plan() {
     const { currentUser } = useAuth()
-
-
 
     const router = useRouter()
 
@@ -29,19 +36,60 @@ export default function Plan() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
 
     const [data, setData] = useState([])
+    const [users, setUsers] = useState([]);
+
+    const [selectedUser, setSelectedUser] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
 
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/plan?page=${page}&limit=${limit}&search=${debouncedSearch}`);
-            const data = await res.json()
+            const params = new URLSearchParams({
+                page: String(page),
+                limit: String(limit),
+                search: debouncedSearch,
+            });
 
-            if (data.success) {
-                setData(data.data)
-                setTotalPages(data.totalPages)
-                setTotalData(data.totalData)
+            if (selectedUser) {
+                params.append("id_user", selectedUser);
             }
 
+            if (startDate) {
+                params.append("startDate", startDate);
+            }
+            if (endDate) {
+                params.append("endDate", endDate);
+            }
+
+            const planPromise = fetch(`/api/plan?${params}`);
+
+            const userPromise =
+                currentUser?.role?.role !== "kepala cabang"
+                    ? fetch("/api/user?all=true")
+                    : Promise.resolve(null);
+
+
+            const [planRes, userRes] = await Promise.all([
+                planPromise,
+                userPromise,
+            ]);
+
+            const planData = await planRes.json()
+
+            if (planData.success) {
+                setData(planData.data)
+                setTotalPages(planData.totalPages)
+                setTotalData(planData.totalData)
+            }
+
+            if (userRes) {
+                const userData = await userRes.json();
+
+                if (userData.success) {
+                    setUsers(userData.users);
+                }
+            }
         } catch (error) {
             toast.error("failed to fetching data", {
                 description: error.message || "Something went wrong"
@@ -66,7 +114,7 @@ export default function Plan() {
 
     useEffect(() => {
         loadData()
-    }, [page, debouncedSearch, limit]);
+    }, [page, debouncedSearch, limit, selectedUser, startDate, endDate]);
 
 
     const handleNavigateToDetail = (item) => {
@@ -81,41 +129,115 @@ export default function Plan() {
                         <Link href="/plan/create"><MyButton label="Create Plan" variant="success"></MyButton></Link>)}
                 </div>
 
-                <div className="flex justify-between items-end">
-                    <div className="flex gap-2 flex-wrap">
-                        <div className="flex flex-col gap-2 text-sm text-stone-500 shrink-0">
-                            <span>Search</span>
-                            <input
-                                type="text"
-                                placeholder="Search plan by title..."
-                                value={search}
-                                onChange={(e) => {
-                                    setSearch(e.target.value);
-                                    setPage(1);
-                                }}
-                                className="w-full sm:w-64 px-3 text-stone-400 py-1.5 text-base rounded-md border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-stone-500/20 focus:border-stone-500"
-                            />
-                        </div>
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-4 pt-2">
 
-                        <div className="flex flex-col gap-2 text-sm text-stone-500 shrink-0">
-                            <span>Show</span>
-                            <select
-                                value={limit}
+                    <div className="flex flex-col gap-2 text-sm text-stone-500 shrink-0">
+                        <span>Search</span>
+                        <input
+                            type="text"
+                            placeholder="Search plan by title..."
+                            value={search}
+                            onChange={(e) => {
+                                setSearch(e.target.value);
+                                setPage(1);
+                            }}
+                            className="w-full px-2 py-1.5 text-stone-400 text-base rounded-md border border-stone-200 bg-white"
+                        />
+                    </div>
+
+                    <div className="flex flex-col gap-2 text-sm text-stone-500">
+                        <span>Show</span>
+                        <select
+                            value={limit}
+                            onChange={(e) => {
+                                setLimit(Number(e.target.value));
+                                setPage(1);
+                            }}
+                            className="w-fit px-2 py-1.5 text-stone-900 text-base rounded-md border border-stone-200 bg-white"
+                        >
+                            <option value={5}>5 </option>
+                            <option value={10}>10 </option>
+                            <option value={25}>25 </option>
+                            <option value={50}>50 </option>
+                        </select>
+                    </div>
+
+                    <div className="flex flex-col gap-2 text-sm text-stone-500">
+                        <span>Filter by Date</span>
+                        <div className="flex gap-1 items-center">
+                            <input
+                                type="date"
+                                value={startDate}
                                 onChange={(e) => {
-                                    setLimit(Number(e.target.value));
+                                    setStartDate(e.target.value);
                                     setPage(1);
                                 }}
-                                className="px-2 py-1.5 text-stone-900 bg-white border border-stone-200 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500/20"
-                            >
-                                <option value={5}>5 </option>
-                                <option value={10}>10 </option>
-                                <option value={25}>25 </option>
-                                <option value={50}>50 </option>
-                            </select>
+                                onClick={(e) => e.target.showPicker()}
+                                className="w-full px-2 py-1 text-stone-900 text-base rounded-md border border-stone-200 bg-white"
+                            />
+                            <span className="text-xs text-stone-400">to</span>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => {
+                                    setEndDate(e.target.value);
+                                    setPage(1);
+                                }}
+                                onClick={(e) => e.target.showPicker()}
+                                className="w-full px-2 py-1 text-stone-900 text-base rounded-md border border-stone-200 bg-white"
+                            />
+
                         </div>
                     </div>
-                    <div className="text-xs text-stone-400">Total Plans : <span className="text-stone-900">{totalData}</span> </div>
+
+                    {currentUser.role?.role != "kepala cabang" && (
+                        <div className="flex flex-col gap-2 text-sm text-stone-500">
+                            <span>filter by user</span>
+                            <Combobox
+                                items={users}
+                                value={selectedUser}
+                                onValueChange={(value) => {
+                                    setSelectedUser(value);
+                                    setPage(1);
+                                }}>
+                                <ComboboxInput
+                                    placeholder="Select a user"
+                                    className="bg-white"
+                                    value={
+                                        users.find((u) => String(u.id) === selectedUser)?.name || ""
+                                    }
+                                />
+                                <ComboboxContent>
+                                    <ComboboxEmpty>No user found.</ComboboxEmpty>
+                                    <ComboboxList>
+                                        {(item) => (
+                                            <ComboboxItem key={item.id} value={String(item.id)}>
+                                                {item.name}
+                                            </ComboboxItem>
+                                        )}
+                                    </ComboboxList>
+                                </ComboboxContent>
+                            </Combobox>
+                        </div>
+                    )}
+
                 </div>
+                <div className="text-xs text-stone-400 text-end py-2">Total Plans : <span className="text-stone-900">{totalData}</span> </div>
+
+                {(startDate || endDate || selectedUser) && (
+                    <MyButton
+                        label="clear filter"
+                        variant="netral"
+                        onClick={() => {
+                            setStartDate("");
+                            setEndDate("");
+                            setSelectedUser('')
+                            setPage(1);
+                        }}
+
+                    />
+
+                )}
             </div>
 
             <div className="block space-y-2">

@@ -74,7 +74,10 @@ export const getAllPlans = async ({
     showAll = false,
     areaGroup = false,
     id_user,
-    area
+    area,
+    filterUser,
+    startDate,
+    endDate
 }) => {
 
     const from = (page - 1) * limit;
@@ -111,9 +114,19 @@ export const getAllPlans = async ({
         finalQuery = finalQuery.eq("id_user", id_user);
     }
 
+    if (filterUser) {
+        finalQuery = finalQuery.eq("id_user", filterUser);
+    }
 
     if (search) {
         finalQuery = finalQuery.ilike("title", `%${search}%`);
+    }
+
+    if (startDate) {
+        finalQuery = finalQuery.gte("date", startDate);
+    }
+    if (endDate) {
+        finalQuery = finalQuery.lte("date", endDate);   
     }
 
 

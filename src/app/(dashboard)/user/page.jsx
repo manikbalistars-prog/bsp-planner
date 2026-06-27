@@ -178,7 +178,7 @@ export default function Users() {
                                                         </>
                                                     }
                                                     onConfirm={() => handleDelete(user.id, user.name)}
-                                                    trigger={<MyButton iconOnly icon={IconTrash} variant="danger" />}
+                                                    trigger={<MyButton iconOnly icon={IconTrash} variant="danger" className="w-fit" />}
                                                 />
                                             </div>
                                         </TableCell>

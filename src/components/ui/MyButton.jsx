@@ -10,14 +10,16 @@ const MyButton = ({
     icon: Icon,
     iconPosition = "left",
     iconOnly = false,
+    w
 }) => {
     const variants = {
         primary: "bg-blue-500 text-white hover:bg-blue-700 cursor-pointer",
         success: "bg-green-500 text-white hover:bg-green-700 cursor-pointer",
         danger: "bg-red-500 text-white hover:bg-red-700 cursor-pointer",
         warning: "bg-yellow-500 text-white hover:bg-yellow-700 cursor-pointer",
+        netral: "bg-stone-500 text-white hover:bg-stone-700 cursor-pointer",
         white: "bg-white text-black hover:bg-stone-200 cursor-pointer",
-        w_outline:"bg-white text-black hover:bg-stone-200 cursor-pointer outline-1 outline-stone-300",
+        w_outline: "bg-white text-black hover:bg-stone-200 cursor-pointer outline-1 outline-stone-300",
         disable: "bg-stone-200 text-stone-400 cursor-not-allowed",
     };
 
@@ -30,9 +32,9 @@ const MyButton = ({
             type={type}
             disabled={disabled || variant === "disable"}
             className={`
-        ${selectedVariant}
+        ${selectedVariant} ${w}
         rounded-md text-sm font-medium transition-colors
-        flex items-center justify-center gap-2 w-full
+        flex items-center justify-center gap-2 
         ${iconOnly ? "p-2 aspect-square" : "px-3 py-1.5"} 
       `}
         >

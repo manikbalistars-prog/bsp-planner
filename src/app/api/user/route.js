@@ -1,12 +1,26 @@
 
 import { NextResponse } from "next/server";
-import { getUsersPaginated, createUser, findUserByUsername } from "@/repositories/user.repository";
+import { getUsersPaginated, createUser, findUserByUsername, getUsers } from "@/repositories/user.repository";
 import bcrypt from "bcryptjs";
-import { requireApiAdmin } from "@/lib/api-auth";
+import { requireApiAdmin, requireApiSession } from "@/lib/api-auth";
 
 export async function GET(req) {
   try {
+    const { user, error: authError } = requireApiSession(req);
+    if (authError) return authError;
     const { searchParams } = new URL(req.url);
+    const all = searchParams.get("all") === "true";
+
+    if (all) {
+      const users = await getUsers(user.area?.id || null);
+
+      return NextResponse.json({
+        success: true,
+        users,
+      });
+    }
+
+
     const page = Number(searchParams.get("page")) || 1;
     const limit = Number(searchParams.get("limit")) || 10;
     const search = searchParams.get("search") || "";

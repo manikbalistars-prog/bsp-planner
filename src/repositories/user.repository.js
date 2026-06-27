@@ -87,3 +87,31 @@ export async function getUsersPaginated({ page = 1, limit = 10, search = "" }) {
     totalPages: Math.ceil(count / limit),
   };
 }
+
+
+export async function getUsers(area = null) {
+  let query = supabase
+    .from("users")
+    .select(`
+      id,
+      username,
+      name,
+      isAdmin,
+      id_role,
+      role:id_role(role),
+      branch:id_branch!inner(id, name, id_area)
+    `)
+    .eq("isDelete", false);
+
+  if (area !== null) {
+    query = query.eq("branch.id_area", area);
+  }
+
+  const { data, error } = await query.order("created_at", {
+    ascending: false,
+  });
+
+  if (error) throw new Error(error.message);
+
+  return data;
+}

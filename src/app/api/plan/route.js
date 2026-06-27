@@ -39,6 +39,9 @@ export const GET = async (req) => {
         const page = Number(searchParams.get("page")) || 1;
         const limit = Number(searchParams.get("limit")) || 10;
         const search = searchParams.get("search") || "";
+        const idUser = searchParams.get("id_user");
+        const startDate = searchParams.get("startDate") || undefined;
+        const endDate = searchParams.get("endDate") || undefined;
 
         const showAll =
             decoded.isAdmin || decoded.role?.role === "owner";
@@ -48,9 +51,12 @@ export const GET = async (req) => {
             limit,
             search,
             showAll,
-            areaGroup : true,
+            areaGroup: true,
             id_user: decoded.id,
-            area: decoded.area?.area
+            area: decoded.area?.area,
+            filterUser: idUser,
+            startDate,
+            endDate
         });
 
         return NextResponse.json({ success: true, ...result });

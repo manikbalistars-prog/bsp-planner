@@ -114,6 +114,7 @@ export default function PhotoSelector({
                     icon={isUploading ? Spinner : IconTrash}
                     disabled={isUploading}
                     onClick={() => onDelete(type)}
+                    w='w-full'
                 />
             )}
         </div>

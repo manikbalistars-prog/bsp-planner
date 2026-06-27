@@ -188,12 +188,17 @@ export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle,
                 }),
             })
 
+
+
             const data = await res.json()
             if (!res.ok || !data.success) {
                 throw new Error(data.message || "Failed to update status")
             }
             toast.success("Item updated successfully")
-            router.refresh()
+
+            if (onRefresh) {
+                await onRefresh();
+            }
 
         } catch (error) {
             toast.error("Update status failed", { description: error.message })

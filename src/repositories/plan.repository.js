@@ -81,30 +81,6 @@ export const getAllPlans = async ({
     const to = from + limit - 1;
 
 
-    const branchRelation = areaGroup && !showAll
-        ? 'branch:id_branch!inner(id, name, area:id_area!inner(id, area))'
-        : 'branch:id_branch(id, name, area:id_area(id, area))';
-
-    let query = supabase
-        .from("plan")
-        .select(
-            `
-      id,
-      title,
-      date,
-      user:id_user (
-        id,
-        name,
-        role:id_role (
-          id,
-          role
-        )
-      ),
-      ${branchRelation === 'branch:id_branch(id, name, area:id_area(id, area))' ? 'branch:id_branch(id, name, area:id_area(id, area))' : branchRelation}
-    `,
-            { count: "exact" }
-        );
-
     let selectString = `
       id,
       title,

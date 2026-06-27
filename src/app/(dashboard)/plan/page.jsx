@@ -44,7 +44,7 @@ export default function Plan() {
 
         } catch (error) {
             toast.error("failed to fetching data", {
-                description: err.message || "Something went wrong"
+                description: error.message || "Something went wrong"
             })
 
         } finally {
@@ -87,7 +87,7 @@ export default function Plan() {
                             <span>Search</span>
                             <input
                                 type="text"
-                                placeholder="Search users by title..."
+                                placeholder="Search plan by title..."
                                 value={search}
                                 onChange={(e) => {
                                     setSearch(e.target.value);

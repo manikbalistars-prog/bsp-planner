@@ -52,7 +52,7 @@ export const getPlanById = async (id) => {
     const totalPending = totalTask - totalCompleted - totalUncompleted;
 
     const totalPoints =
-        (totalCompleted * 15) +
+        (totalCompleted * 10) +
         (totalUncompleted * 5);
 
     if (error) throw error;

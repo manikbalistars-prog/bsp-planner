@@ -11,7 +11,7 @@ export async function GET(req) {
     );
   }
 
-  console.log(user)
+  // console.log(user)
 
   return NextResponse.json({
     user,

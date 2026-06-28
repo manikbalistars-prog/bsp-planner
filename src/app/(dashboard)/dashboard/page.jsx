@@ -263,8 +263,11 @@ export default function Dashboard() {
                                 PIC
                             </TableHead>
 
-                            <TableHead className="text-right">
+                            <TableHead>
                                 Point
+                            </TableHead>
+                            <TableHead className="text-right">
+                                Score
                             </TableHead>
                         </TableRow>
 
@@ -315,8 +318,12 @@ export default function Dashboard() {
                                         {item.user_name ?? "-"}
                                     </TableCell>
 
-                                    <TableCell className="text-right font-bold">
+                                    <TableCell>
                                         {item.branch_points}
+                                    </TableCell>
+
+                                    <TableCell className="text-right font-bold">
+                                        {item.branch_score}
                                     </TableCell>
 
                                 </TableRow>

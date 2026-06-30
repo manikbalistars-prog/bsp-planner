@@ -8,7 +8,6 @@ import imageCompression from "browser-image-compression"
 
 import PhotoSelector from "@/components/ui/PhotoSelector"
 import { Spinner } from "../ui/spinner"
-import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 
 const getStatusStyles = (status) => {
@@ -33,7 +32,6 @@ export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle,
 
     const { currentUser } = useAuth()
 
-    const router = useRouter()
     const [uploadingBefore, setUploadingBefore] = useState(false)
     const [uploadingAfter, setUploadingAfter] = useState(false)
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { MyButton } from "@/components/ui/MyButton"
 import { Spinner } from "@/components/ui/spinner"
 import { IconPhoto, IconCheck, IconTrash, IconZoomIn, IconZoomOut } from "@tabler/icons-react"
@@ -10,6 +10,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog"
 
+
 export default function PhotoSelector({
     type,
     savedImage,
@@ -19,10 +20,17 @@ export default function PhotoSelector({
     onUpload,
     onCancel,
     onDelete,
+    onSave,
     itemId,
-    showAction
+    isLoading,
+    showAction,
+    note: initialNote
 }) {
     const [isZoomed, setIsZoomed] = useState(false)
+    const [note, setNote] = useState(initialNote || "")
+    useEffect(() => {
+        setNote(initialNote || "")
+    }, [initialNote])
 
     return (
         <div className="space-y-2">
@@ -31,7 +39,32 @@ export default function PhotoSelector({
                 {type}
             </span>
 
+            {showAction && (
+                <div className="pb-5">
+                    <label
+                        htmlFor={`${type}-note`}
+                        className="text-xs font-medium text-stone-600"
+                    >
+                        Note
+                    </label>
 
+                    <textarea
+                        id={`${type}-note`}
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder={`Write ${type.toLowerCase()} note...`}
+                        rows={4}
+                        className=" w-full rounded-lg border border-stone-300bg-white px-3 py-2 text-base placeholder:text-stone-400"
+                    />
+
+                    <MyButton
+                        label={isLoading ? "Saving..." : "Save or Update"}
+                        disabled={isLoading}
+                        variant={isLoading ? "disable" : "primary"}
+                        onClick={() => onSave(type, note)}
+                    />
+                </div>
+            )}
             {previewUrl || savedImage ? (
                 <Dialog onOpenChange={(open) => { if (!open) setIsZoomed(false) }}>
                     <DialogTrigger asChild>

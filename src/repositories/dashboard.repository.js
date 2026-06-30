@@ -29,7 +29,7 @@ export const getDashboardArea = async (month, year) => {
 const getEffectiveDay = async (month, year) => {
     const { data, error } = await supabase
         .from("effective_day")
-        .select("total_day")
+        .select("*")
         .eq("month", month)
         .eq("year", year)
         .single();
@@ -40,6 +40,19 @@ const getEffectiveDay = async (month, year) => {
         throw new Error(
             `Effective day belum dikonfigurasi untuk ${month}/${year}`
         );
+    }
+
+    if (data.is_locked) {
+        return data.total_day;
+    }
+
+    const today = new Date();
+
+    if (
+        today.getMonth() + 1 === month &&
+        today.getFullYear() === year
+    ) {
+        return today.getDate();
     }
 
     return data.total_day;

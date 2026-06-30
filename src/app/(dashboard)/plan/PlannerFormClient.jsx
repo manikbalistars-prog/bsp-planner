@@ -53,11 +53,22 @@ export default function PlannerFormClient({ currentPlan = null }) {
         setLoading(true)
         try {
 
+            const formattedDate = form.date
+                ? new Date(form.date.getTime() - form.date.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .split("T")[0]
+                : undefined;
+
+            const apiForm = {
+                ...form,
+                date: formattedDate
+            };
+
             const apiUrl = isEditMode ? `/api/plan/${currentPlan.id}` : `/api/plan`;
             const apiMethod = isEditMode ? "PUT" : "POST";
             const payloadBody = isEditMode
-                ? { id: currentPlan.id, id_user: currentPlan.id_user, ...form }
-                : form;
+                ? { id: currentPlan.id, id_user: currentPlan.id_user, ...apiForm }
+                : apiForm;
 
             const res = await fetch(apiUrl, {
                 method: apiMethod,

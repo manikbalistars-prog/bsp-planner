@@ -10,7 +10,7 @@ export async function GET(req) {
       { status: 401 }
     );
   }
-
+console.log(user)
   return NextResponse.json({
     user,
   });

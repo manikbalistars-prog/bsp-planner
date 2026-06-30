@@ -45,6 +45,8 @@ export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle,
     const [savingBeforeNote, setSavingBeforeNote] = useState(false)
     const [savingAfterNote, setSavingAfterNote] = useState(false)
 
+    
+
 
     const imageBefore = item.images?.find(img => img.image_type === 'before') || null
     const imageAfter = item.images?.find(img => img.image_type === 'after') || null
@@ -358,6 +360,8 @@ export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle,
                                             showAction={showAction}
                                             isLoading={savingBeforeNote}
                                             note={item.before_note}
+                                            showNote={currentUser.role?.role != "kepala cabang"}
+    
                                         />
 
                                         <PhotoSelector
@@ -374,6 +378,7 @@ export default function PlanItemCard({ id_user_plan, item, isExpanded, onToggle,
                                             showAction={showAction}
                                             isLoading={savingAfterNote}
                                             note={item.after_note}
+                                            showNote={currentUser.role?.role != "kepala cabang"}
 
                                         />
                                     </div>

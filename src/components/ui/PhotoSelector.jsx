@@ -24,7 +24,8 @@ export default function PhotoSelector({
     itemId,
     isLoading,
     showAction,
-    note: initialNote
+    note: initialNote,
+    showNote
 }) {
     const [isZoomed, setIsZoomed] = useState(false)
     const [note, setNote] = useState(initialNote || "")
@@ -33,14 +34,14 @@ export default function PhotoSelector({
     }, [initialNote])
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-2 border-b pb-5">
 
             <span className="text-[10px] font-medium text-stone-500 uppercase tracking-wider block">
                 {type}
             </span>
 
             {showAction && (
-                <div className="pb-5">
+                <div className=" text-sm text-stone-800 bg-amber-200 p-2 rounded-sm">
                     <label
                         htmlFor={`${type}-note`}
                         className="text-xs font-medium text-stone-600"
@@ -53,14 +54,14 @@ export default function PhotoSelector({
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         placeholder={`Write ${type.toLowerCase()} note...`}
-                        rows={4}
-                        className=" w-full rounded-lg border border-stone-300bg-white px-3 py-2 text-base placeholder:text-stone-400"
+                        className=" w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-base placeholder:text-stone-400"
                     />
 
                     <MyButton
                         label={isLoading ? "Saving..." : "Save or Update"}
                         disabled={isLoading}
-                        variant={isLoading ? "disable" : "primary"}
+                        variant={isLoading ? "disable" : "success"}
+                        w={'w-full'}
                         onClick={() => onSave(type, note)}
                     />
                 </div>
@@ -149,6 +150,13 @@ export default function PhotoSelector({
                     onClick={() => onDelete(type)}
                     w='w-full'
                 />
+            )}
+
+            {showNote &&(
+                <div className="text-sm text-stone-800 bg-amber-200 p-2 rounded-sm ">
+                    <div className="text-xs font-bold">{`Note for ${type}`}</div>
+                    <div>{note || '-'}</div>
+                </div>
             )}
         </div>
     )

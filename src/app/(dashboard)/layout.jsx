@@ -20,6 +20,20 @@ function DashboardLayoutContent({ children }) {
     const showOnPaths = ["/plan", "/dashboard", "/user"];
     const shouldShow = showOnPaths.includes(pathname);
 
+    const [isDemo, setIsDemo] = useState(false);
+
+    useEffect(() => {
+        const host = window.location.hostname;
+
+        const demoHosts = [
+            "localhost",
+            "127.0.0.1",
+            "demo-xyz-bsp-planner.vercel.app",
+        ];
+
+        setIsDemo(demoHosts.includes(host));
+    }, []);
+
 
 
     useEffect(() => {
@@ -60,7 +74,8 @@ function DashboardLayoutContent({ children }) {
 
 
                 <div className="fixed w-full shadow-sm rounded-b-xl bg-white top-0 z-50">
-                    <Navbar user={user}></Navbar>
+
+                    <Navbar user={user} isDemo={isDemo}></Navbar>
                 </div>
                 <div className="min-h-11"></div>
 

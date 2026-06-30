@@ -10,12 +10,22 @@ import {
 
 import { useLogout } from "@/hooks/useLogout";
 
-export default function Navbar({ user }) {
+export default function Navbar({ user, isDemo }) {
   const { logout, loading } = useLogout()
 
   return (
     <div className="py-3 px-3 flex justify-between items-center">
-      <span className="text-sm text-stone-500">{`${user?.role?.role || ""} | ${user?.branch?.name || user?.area?.area || ""}`} </span>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-stone-500">
+          {`${user?.role?.role || ""} | ${user?.branch?.name || user?.area?.area || ""}`}
+        </span>
+
+        {isDemo && (
+          <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-semibold text-white">
+            DEMO
+          </span>
+        )}
+      </div>
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 cursor-pointer select-none focus:outline-none hover:opacity-80 transition disabled:opacity-50" disabled={loading}>
           <p className="text-sm text-stone-900">

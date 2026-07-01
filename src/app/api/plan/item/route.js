@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/api-auth";
 
-import { createPlanItem } from "@/repositories/plan_item.repository";
+import { createPlanItem, getAllPlanItems } from "@/repositories/plan_item.repository";
 import { getPlanById } from "@/repositories/plan.repository";
 
 export const POST = async (req) => {
@@ -32,6 +32,49 @@ export const POST = async (req) => {
             success: true,
             item
         })
+
+    } catch (error) {
+        return NextResponse.json(
+            { success: false, message: error.message },
+            { status: 500 }
+        );
+    }
+}
+
+
+export const GET = async (req) => {
+    try {
+       
+        const { user: decoded, error: authError } = requireApiSession(req);
+        if (authError) return authError;
+
+        const { searchParams } = new URL(req.url);
+        const page = Number(searchParams.get("page")) || 1;
+        const limit = Number(searchParams.get("limit")) || 10;
+        const status = searchParams.get("status") || undefined;
+
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        const showAll = decoded.isAdmin || decoded.role?.role === "owner";
+        const userAreaId = decoded.area?.id;
+
+       
+        const { data, count } = await getAllPlanItems({
+            from,
+            to,
+            showAll,
+            userAreaId,
+            status
+        });
+
+        return NextResponse.json({
+            success: true,
+            data,
+            totalData: count,
+            page,
+            totalPages: Math.ceil(count / limit)
+        });
 
     } catch (error) {
         return NextResponse.json(

@@ -44,7 +44,7 @@ export const POST = async (req) => {
 
 export const GET = async (req) => {
     try {
-       
+
         const { user: decoded, error: authError } = requireApiSession(req);
         if (authError) return authError;
 
@@ -52,6 +52,7 @@ export const GET = async (req) => {
         const page = Number(searchParams.get("page")) || 1;
         const limit = Number(searchParams.get("limit")) || 10;
         const status = searchParams.get("status") || undefined;
+        const idUser = searchParams.get("id_user") || undefined;
 
         const from = (page - 1) * limit;
         const to = from + limit - 1;
@@ -59,13 +60,14 @@ export const GET = async (req) => {
         const showAll = decoded.isAdmin || decoded.role?.role === "owner";
         const userAreaId = decoded.area?.id;
 
-       
+
         const { data, count } = await getAllPlanItems({
             from,
             to,
             showAll,
             userAreaId,
-            status
+            status,
+            idUser
         });
 
         return NextResponse.json({

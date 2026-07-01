@@ -39,5 +39,6 @@ export const config = {
     "/dashboard/:path*",
     "/plan/:path*",
     "/user/:path*",
+    "/items/:path*"
   ],
 };

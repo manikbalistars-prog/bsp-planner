@@ -17,7 +17,7 @@ function DashboardLayoutContent({ children }) {
     const [layoutLoading, setLayoutLoading] = useState(true);
 
     const pathname = usePathname()
-    const showOnPaths = ["/plan", "/dashboard", "/user"];
+    const showOnPaths = ["/plan", "/dashboard", "/user", "/items"];
     const shouldShow = showOnPaths.includes(pathname);
 
     const [isDemo, setIsDemo] = useState(false);

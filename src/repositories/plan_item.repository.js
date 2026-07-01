@@ -24,7 +24,7 @@ export const getItemByPlanId = async (id) => {
     return data
 }
 
-export const getAllPlanItems = async ({ from, to, showAll, userAreaId, status }) => {
+export const getAllPlanItems = async ({ from, to, showAll, userAreaId, status, idUser }) => {
     let query = supabase
         .from('plan_item')
         .select(`
@@ -51,6 +51,9 @@ export const getAllPlanItems = async ({ from, to, showAll, userAreaId, status })
 
     if (status) {
         query = query.eq('status', status);
+    }
+    if (idUser) {
+        query = query.eq('plan.id_user', idUser);
     }
 
     query = query

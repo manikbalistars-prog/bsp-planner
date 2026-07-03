@@ -46,16 +46,21 @@ const getEffectiveDay = async (month, year) => {
         return data.total_day;
     }
 
-    const today = new Date();
+    const indonesiaDate = new Date(
+        new Date().toLocaleString("en-US", {
+            timeZone: "Asia/Jakarta",
+        })
+    );
 
     if (
-        today.getMonth() + 1 !== month ||
-        today.getFullYear() !== year
+        indonesiaDate.getMonth() + 1 !== month ||
+        indonesiaDate.getFullYear() !== year
     ) {
         return data.total_day;
     }
 
-    const effectiveDay = today.getDate() - data.day_start;
+
+    const effectiveDay = indonesiaDate.getDate() - data.day_start;
 
     return Math.max(effectiveDay, 0);
 };

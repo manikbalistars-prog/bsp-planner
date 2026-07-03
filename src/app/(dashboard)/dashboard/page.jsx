@@ -18,6 +18,12 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
+import {
+    IconChecklist,
+    IconClockHour4,
+    IconClipboardList,
+} from "@tabler/icons-react";
+
 import { Spinner } from "@/components/ui/spinner";
 
 import { toast } from "sonner";
@@ -128,16 +134,16 @@ export default function Dashboard() {
     const cardColor = (area) => {
         switch (area) {
             case "BARAT":
-                return "bg-blue-500/10";
+                return "bg-blue-300/10";
 
             case "TIMUR":
-                return "bg-green-500/10";
+                return "bg-green-300/10";
 
             case "CENTRAL":
-                return "bg-orange-500/10";
+                return "bg-orange-300/10";
 
             default:
-                return "bg-purple-500/10";
+                return "bg-purple-300/10";
         }
     };
 
@@ -204,7 +210,7 @@ export default function Dashboard() {
 
             </div>
 
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
 
                 {loading ? (
                     Array.from({ length: 4 }).map((_, index) => (
@@ -221,23 +227,70 @@ export default function Dashboard() {
                                 area.area_name
                             )}`}
                         >
-                            <div className="text-sm font-medium text-muted-foreground">
+                            <h3 className="text-sm font-semibold text-muted-foreground">
                                 {area.area_name}
+                            </h3>
+
+                            <div className="mt-5 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <IconChecklist size={18} className="" />
+                                        <span className="text-sm">Checked</span>
+                                    </div>
+
+                                    <span className="text-lg font-bold">
+                                        {area.total_progress}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <IconClockHour4 size={18} className="" />
+                                        <span className="text-sm">Need Check</span>
+                                    </div>
+
+                                    <span className="text-lg font-bold">
+                                        {area.need_check}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <IconClipboardList size={18} />
+                                        <span className="text-sm">Total Items</span>
+                                    </div>
+
+                                    <span className="text-lg font-bold">
+                                        {area.total_task}
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="mt-3 text-4xl font-bold">
-                                {area.total_progress}<span className="text-sm text-stone-500">/{area.total_task}</span>
+                            <div className="mt-5 h-2 rounded-full bg-muted overflow-hidden">
+                                <div
+                                    className="h-full rounded-full bg-stone-600 transition-all"
+                                    style={{
+                                        width: `${area.need_check === 0
+                                                ? 0
+                                                : (area.total_progress / area.need_check) * 100
+                                            }%`,
+                                    }}
+                                />
                             </div>
 
-                            <div className="mt-2 text-sm text-muted-foreground">
-                                Progress
-                            </div>
+                            <p className="mt-2 text-xs text-muted-foreground">
+                                {area.need_check === 0
+                                    ? "Belum ada item yang siap dicek"
+                                    : `${Math.round(
+                                        (area.total_progress / area.need_check) * 100
+                                    )}% selesai diperiksa`}
+                            </p>
                         </div>
                     ))
                 )}
             </div>
 
-     
+
             <div>Efective day : <span>{efectiveDay}</span></div>
             <div className="rounded-lg border overflow-hidden">
 
@@ -263,9 +316,6 @@ export default function Dashboard() {
                                 PIC
                             </TableHead>
 
-                            <TableHead>
-                                Point
-                            </TableHead>
                             <TableHead className="text-right">
                                 Score
                             </TableHead>
@@ -316,10 +366,6 @@ export default function Dashboard() {
 
                                     <TableCell>
                                         {item.user_name ?? "-"}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {item.branch_points}
                                     </TableCell>
 
                                     <TableCell className="text-right font-bold">

@@ -49,11 +49,13 @@ const getEffectiveDay = async (month, year) => {
     const today = new Date();
 
     if (
-        today.getMonth() + 1 === month &&
-        today.getFullYear() === year
+        today.getMonth() + 1 !== month ||
+        today.getFullYear() !== year
     ) {
-        return today.getDate();
+        return data.total_day;
     }
 
-    return data.total_day;
+    const effectiveDay = today.getDate() - data.day_start;
+
+    return Math.max(effectiveDay, 0);
 };

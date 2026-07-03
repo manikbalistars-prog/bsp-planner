@@ -2,6 +2,18 @@ import { supabase } from "@/lib/supabase";
 
 
 export const createPlan = async (obj) => {
+    const { data: existing, error: checkError } = await supabase
+        .from("plan")
+        .select("id")
+        .eq("id_user", obj.id_user)
+        .eq("date", obj.date)
+        .limit(1);
+
+    if (checkError) throw checkError;
+
+    if (existing) {
+        throw new Error("Plan untuk tanggal tersebut sudah dibuat. Mohon untuk memilih tanggal lain! :D");
+    }
     const { data, error } = await supabase.from("plan").insert(obj).select().single()
     if (error) throw error
 

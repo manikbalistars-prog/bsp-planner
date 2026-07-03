@@ -80,7 +80,7 @@ export async function DELETE(req) {
             );
         }
 
-        if (id_user_plan != decoded.id) {
+        if (id_user_plan != decoded.id && decoded.role?.role == "kepala cabang") {
             return NextResponse.json(
                 { success: false, message: "Unauthorized" },
                 { status: 401 },

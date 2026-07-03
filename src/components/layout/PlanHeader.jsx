@@ -14,24 +14,20 @@ export default function PlanHeaderCard({ plan, onDelete, showAction }) {
                     <h1 className="text-stone-400 font-bold">Detail Plan</h1>
                 </div>
                 <div className="flex gap-2">
-                    {showAction && (
-                        <>
-                            <DeleteConfirmDialog
-                                title="Delete User"
-                                description="Are you sure you want to delete this?"
-                                onConfirm={() => onDelete(plan.id, plan.user.id)}
-                                trigger={<MyButton
-                                    iconOnly
-                                    icon={IconTrash}
-                                    variant="danger"
+                    <DeleteConfirmDialog
+                        title="Delete User"
+                        description="Are you sure you want to delete this?"
+                        onConfirm={() => onDelete(plan.id, plan.user.id)}
+                        trigger={<MyButton
+                            iconOnly
+                            icon={IconTrash}
+                            variant="danger"
 
-                                />}
-                            />
-                            <Link href={`/plan/edit?id=${plan.id}`}>
-                                <MyButton icon={IconEdit} variant="warning" iconOnly />
-                            </Link></>
-                    )}
-
+                        />}
+                    />
+                    <Link href={`/plan/edit?id=${plan.id}`}>
+                        <MyButton icon={IconEdit} variant="warning" iconOnly />
+                    </Link>
                     <Link href="/plan">
                         <MyButton label="back" variant="primary" />
                     </Link>
@@ -61,7 +57,7 @@ export default function PlanHeaderCard({ plan, onDelete, showAction }) {
                 <StatusCard label="Completed" Icon={IconProgressCheck} data={plan.totalCompleted} variant="success" />
                 <StatusCard label="Uncompleted" Icon={IconProgressX} data={plan.totalUncompleted} variant="danger" />
                 <StatusCard label="Pending" Icon={IconProgressHelp} data={plan.totalPending} variant="warning" />
-                <StatusCard label="Points" Icon={IconAward } data={plan.totalPoints} variant="sky" />
+                <StatusCard label="Points" Icon={IconAward} data={plan.totalPoints} variant="sky" />
             </div>
         </div>
     )

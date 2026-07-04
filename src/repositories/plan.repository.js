@@ -9,11 +9,7 @@ export const createPlan = async (obj) => {
         .eq("date", obj.date)
         .limit(1);
 
-    console.log(obj)
-
     if (checkError) throw checkError;
-
-    console.log(existing)
 
     if (existing.length > 0) {
         throw new Error("Plan untuk tanggal tersebut sudah dibuat. Mohon untuk memilih tanggal lain! :D");

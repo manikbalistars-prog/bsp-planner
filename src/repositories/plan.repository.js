@@ -44,6 +44,7 @@ export const getPlanById = async (id) => {
             id,
             title,
             date,
+            point,
             user:id_user (
                 id,
                 name,
@@ -68,6 +69,9 @@ export const getPlanById = async (id) => {
         .eq("id", id).order('time', { foreignTable: 'plan_item', ascending: true })
         .single();
 
+    if (error) throw error;
+    if (!data) return null;
+
     const totalTask = data.items.length;
 
     const totalCompleted = data.items.filter(
@@ -80,25 +84,13 @@ export const getPlanById = async (id) => {
 
     const totalPending = totalTask - totalCompleted - totalUncompleted;
 
-    let totalPoints = 0;
-
-    if (totalTask > 0) {
-        if (totalCompleted === totalTask) {
-            totalPoints = 10;
-        } else if (totalUncompleted > 0) {
-            totalPoints = 5;
-        }
-    }
-
-    if (error) throw error;
-
     return {
         ...data,
         totalTask,
         totalCompleted,
         totalUncompleted,
         totalPending,
-        totalPoints,
+        totalPoints: data.point || 0,
     };
 };
 
@@ -263,3 +255,42 @@ export const deletePlan = async (id) => {
 
     return data;
 };
+
+
+export const recalculateAndSavePlanPoints = async (id_plan) => {
+    const { data: items, error: fetchError } = await supabase
+        .from("plan_item")
+        .select("status, after_note")
+        .eq("id_plan", id_plan);
+
+    if (fetchError) throw fetchError;
+
+    const totalCompleted = items?.filter(item => item.status === "completed").length || 0;
+
+    const totalPendingWithNote = items?.filter(item =>
+        item.status === "pending" &&
+        item.after_note &&
+        item.after_note.trim() !== ""
+    ).length || 0;
+
+    let calculatedPoints = 0;
+
+    if (totalCompleted >= 3) {
+        calculatedPoints = 10;
+    } else if (totalCompleted > 0 && totalCompleted < 3) {
+        calculatedPoints = 5;
+    } else if (totalPendingWithNote >= 3) {
+        calculatedPoints = 5;
+    }
+
+    const { error: updateError } = await supabase
+        .from("plan")
+        .update({ point: calculatedPoints })
+        .eq("id", id_plan);
+
+    if (updateError) throw updateError;
+
+    return calculatedPoints;
+}
+
+

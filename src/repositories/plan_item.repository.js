@@ -126,3 +126,15 @@ export const deleteItem = async (id) => {
 
     return data;
 };
+
+
+export const getPlanItemForValidation = async (id) => {
+    const { data, error } = await supabase
+        .from("plan_item")
+        .select("id_plan, status, after_note")
+        .eq("id", id)
+        .single();
+
+    if (error) throw error;
+    return data;
+};

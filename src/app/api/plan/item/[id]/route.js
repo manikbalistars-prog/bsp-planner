@@ -1,6 +1,8 @@
-import { deleteItem, updateItem } from "@/repositories/plan_item.repository";
+import { deleteItem, updateItem, getPlanItemForValidation } from "@/repositories/plan_item.repository";
 import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/api-auth";
+import { recalculateAndSavePlanPoints } from "@/repositories/plan.repository";
+
 
 
 export const PUT = async (req) => {
@@ -17,8 +19,19 @@ export const PUT = async (req) => {
         if (id_user_plan != decoded.id) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
+        const oldItem = await getPlanItemForValidation(id);
+        if (!oldItem) {
+            return NextResponse.json({ success: false, message: "Item not found" }, { status: 404 });
+        }
 
         const updateResult = await updateItem(id, data)
+
+        const isStatusChanged = data.status !== undefined && oldItem.status !== data.status;
+        const isNoteChanged = data.after_note !== undefined && oldItem.after_note !== data.after_note;
+
+        if (isStatusChanged || isNoteChanged) {
+            await recalculateAndSavePlanPoints(oldItem.id_plan);
+        }
 
 
         return NextResponse.json({
@@ -57,7 +70,17 @@ export async function DELETE(req) {
             );
         }
 
+        const oldItem = await getPlanItemForValidation(id);
+        if (!oldItem) {
+            return NextResponse.json(
+                { success: false, message: "Item not found" },
+                { status: 404 },
+            );
+        }
+
         const reqdeleteItem = await deleteItem(id);
+
+        await recalculateAndSavePlanPoints(oldItem.id_plan);
         return NextResponse.json({
             success: true,
             message: "Item deleted successfully",

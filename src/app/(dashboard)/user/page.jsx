@@ -22,7 +22,7 @@ export default function Users() {
     const [users, setUsers] = useState([])
     const [page, setPage] = useState(1);
 
-    const [limit, setLimit] = useState(10);
+    const [limit, setLimit] = useState(50);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
 
@@ -122,10 +122,8 @@ export default function Users() {
                         }}
                         className="px-2 py-1.5 bg-white border border-stone-200 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500/20"
                     >
-                        <option value={5}>5 </option>
-                        <option value={10}>10 </option>
-                        <option value={25}>25 </option>
                         <option value={50}>50 </option>
+                        <option value={100}>100 </option>
                     </select>
                 </div>
             </div>

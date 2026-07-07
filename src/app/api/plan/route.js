@@ -37,7 +37,7 @@ export const GET = async (req) => {
 
         const { searchParams } = new URL(req.url);
         const page = Number(searchParams.get("page")) || 1;
-        const limit = Number(searchParams.get("limit")) || 10;
+        const limit = Number(searchParams.get("limit")) || 50;
         const search = searchParams.get("search") || "";
         const idUser = searchParams.get("id_user");
         const startDate = searchParams.get("startDate") || undefined;

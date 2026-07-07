@@ -22,7 +22,7 @@ export async function GET(req) {
 
 
     const page = Number(searchParams.get("page")) || 1;
-    const limit = Number(searchParams.get("limit")) || 10;
+    const limit = Number(searchParams.get("limit")) || 50;
     const search = searchParams.get("search") || "";
 
     const result = await getUsersPaginated({ page, limit, search });

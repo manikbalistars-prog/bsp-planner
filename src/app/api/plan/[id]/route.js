@@ -11,7 +11,7 @@ export const GET = async (req, { params }) => {
 
         const [plan] = await Promise.all([
             getPlanById(resolvedParams.id),
-         
+
 
         ])
 
@@ -46,6 +46,23 @@ export const PUT = async (req) => {
 
         if (id_user != decoded.id) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
+        const todayIndo = new Date(
+            new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+        );
+        todayIndo.setHours(0, 0, 0, 0);
+
+        if (updateData.date) {
+            const inputDate = new Date(updateData.date);
+            inputDate.setHours(0, 0, 0, 0);
+
+            if (inputDate.getTime() <= todayIndo.getTime()) {
+                return NextResponse.json({ 
+                    success: false, 
+                    message: "Hanya boleh mengubah plan ke tanggal besok atau setelahnya (H+1)." 
+                }, { status: 400 });
+            }
         }
 
 

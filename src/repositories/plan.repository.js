@@ -1,7 +1,24 @@
 import { supabase } from "@/lib/supabase";
 
+const getTodayIndo = () => {
+    const today = new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
+    today.setHours(0, 0, 0, 0);
+    return today;
+};
+
 
 export const createPlan = async (obj) => {
+    if (obj.date) {
+        const inputDate = new Date(obj.date);
+        inputDate.setHours(0, 0, 0, 0);
+
+        if (inputDate.getTime() <= getTodayIndo().getTime()) {
+            throw new Error("Hanya boleh membuat plan untuk besok atau tanggal setelahnya (H+1).");
+        }
+    }
+
     const { data: existing, error: checkError } = await supabase
         .from("plan")
         .select("id")
@@ -9,11 +26,7 @@ export const createPlan = async (obj) => {
         .eq("date", obj.date)
         .limit(1);
 
-    console.log(obj)
-
     if (checkError) throw checkError;
-
-    console.log(existing)
 
     if (existing.length > 0) {
         throw new Error("Plan untuk tanggal tersebut sudah dibuat. Mohon untuk memilih tanggal lain! :D");
@@ -200,6 +213,32 @@ export const getAllPlans = async ({
 };
 
 export const updatePlan = async (id, updateData) => {
+    const { data: existingPlan, error: fetchError } = await supabase
+        .from("plan")
+        .select("date")
+        .eq("id", id)
+        .single();
+
+    if (fetchError || !existingPlan) {
+        throw new Error("Plan tidak ditemukan.");
+    }
+
+    const currentPlanDate = new Date(existingPlan.date);
+    currentPlanDate.setHours(0, 0, 0, 0);
+
+    if (currentPlanDate.getTime() <= getTodayIndo().getTime()) {
+        throw new Error("Plan hari ini atau yang sudah lewat tidak dapat diubah kembali.");
+    }
+
+    if (updateData.date) {
+        const newInputDate = new Date(updateData.date);
+        newInputDate.setHours(0, 0, 0, 0);
+
+        if (newInputDate.getTime() <= getTodayIndo().getTime()) {
+            throw new Error("Hanya boleh mengubah plan ke tanggal besok atau setelahnya (H+1).");
+        }
+    }
+
     const { data, error } = await supabase
         .from("plan")
         .update(updateData)

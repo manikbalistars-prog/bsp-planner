@@ -46,7 +46,7 @@ export default function PlanItemsTable() {
     }, [currentUser, router])
 
     const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(10)
+    const [limit, setLimit] = useState(50)
     const [totalPages, setTotalPages] = useState(1)
     const [totalData, setTotalData] = useState(0)
     const [loading, setLoading] = useState(false)
@@ -164,10 +164,8 @@ export default function PlanItemsTable() {
                             }}
                             className="w-full px-3 py-1.5 text-stone-800 text-sm rounded-md border border-stone-200 bg-white focus:outline-none focus:border-stone-400"
                         >
-                            <option value={5}>5 Rows</option>
-                            <option value={10}>10 Rows</option>
-                            <option value={25}>25 Rows</option>
                             <option value={50}>50 Rows</option>
+                            <option value={100}>100 Rows</option>
                         </select>
                     </div>
 
@@ -228,6 +226,7 @@ export default function PlanItemsTable() {
                             onClick={() => {
                                 setSelectedUser('')
                                 setStatusFilter('')
+                                setSearch('')
                                 setPage(1)
                             }}
                         />

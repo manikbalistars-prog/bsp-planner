@@ -50,9 +50,10 @@ export const GET = async (req) => {
 
         const { searchParams } = new URL(req.url);
         const page = Number(searchParams.get("page")) || 1;
-        const limit = Number(searchParams.get("limit")) || 10;
+        const limit = Number(searchParams.get("limit")) || 50;
         const status = searchParams.get("status") || undefined;
         const idUser = searchParams.get("id_user") || undefined;
+        const search = searchParams.get("search") || undefined;
 
         const from = (page - 1) * limit;
         const to = from + limit - 1;
@@ -67,7 +68,8 @@ export const GET = async (req) => {
             showAll,
             userAreaId,
             status,
-            idUser
+            idUser,
+            search
         });
 
         return NextResponse.json({

@@ -25,6 +25,11 @@ export default function PlannerFormClient({ currentPlan = null }) {
         date: "",
     })
 
+    const todayIndo = new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
+    todayIndo.setHours(0, 0, 0, 0);
+
     const updateField = (field, value) => {
         setForm((prev) => ({
             ...prev,
@@ -139,6 +144,11 @@ export default function PlannerFormClient({ currentPlan = null }) {
                     < Calendar mode="single"
                         selected={form.date}
                         onSelect={(selected) => updateField("date", selected)}
+                        disabled={(date) => {
+                            const checkDate = new Date(date);
+                            checkDate.setHours(0,0,0,0);
+                            return checkDate.getTime() <= todayIndo.getTime();
+                        }}
                         className="w-full border-stone-200 border rounded-lg sm:max-w-fit"
                         captionLayout="dropdown" /></div>
                 {errors.date && <p className="-mt-3 text-xs text-red-500">{errors.date}</p>}

@@ -139,7 +139,7 @@ export default function PlannerFormClient({ currentPlan = null }) {
                 />
                 {errors.title && <p className="-mt-3 text-xs text-red-500">{errors.title}</p>}
 
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 sm:items-center">
                     <label className="text-stone-600">Select Date*</label>
                     < Calendar mode="single"
                         selected={form.date}
@@ -149,7 +149,7 @@ export default function PlannerFormClient({ currentPlan = null }) {
                             checkDate.setHours(0,0,0,0);
                             return checkDate.getTime() <= todayIndo.getTime();
                         }}
-                        className="w-full border-stone-200 border rounded-lg sm:max-w-fit"
+                        className="w-full border-stone-200 border rounded-lg sm:w-1/2"
                         captionLayout="dropdown" /></div>
                 {errors.date && <p className="-mt-3 text-xs text-red-500">{errors.date}</p>}
             </div>

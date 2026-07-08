@@ -40,8 +40,19 @@ export const GET = async (req) => {
         const limit = Number(searchParams.get("limit")) || 50;
         const search = searchParams.get("search") || "";
         const idUser = searchParams.get("id_user");
-        const startDate = searchParams.get("startDate") || undefined;
-        const endDate = searchParams.get("endDate") || undefined;
+        let startDate = searchParams.get("startDate") || undefined;
+        let endDate = searchParams.get("endDate") || undefined;
+        const month = Number(searchParams.get("month"));
+        const year = Number(searchParams.get("year"));
+
+        if (!startDate && !endDate && month > 0 && year > 0) {
+            const normalizedMonth = String(month).padStart(2, "0");
+            const lastDay = new Date(year, month, 0);
+            const pad = (value) => String(value).padStart(2, "0");
+
+            startDate = `${year}-${normalizedMonth}-01`;
+            endDate = `${year}-${normalizedMonth}-${pad(lastDay.getDate())}`;
+        }
 
         const showAll =
             decoded.isAdmin || decoded.role?.role === "owner";

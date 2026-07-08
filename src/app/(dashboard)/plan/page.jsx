@@ -1,324 +1,308 @@
-'use client'
-import { MyButton } from "@/components/ui/MyButton"
-import { Spinner } from "@/components/ui/spinner"
-import Link from "next/link"
-import { useAuth } from "@/context/AuthContext"
-import { useState, useEffect } from "react"
-import { formatDate } from "@/lib/utils"
+"use client";
 
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
+import { useMemo, useState, useEffect } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { MyButton } from "@/components/ui/MyButton";
+import { formatDate } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
-import { useRouter } from "next/navigation"
+import Link from "next/link";
 
 import {
-    Combobox,
-    ComboboxContent,
-    ComboboxEmpty,
-    ComboboxInput,
-    ComboboxItem,
-    ComboboxList,
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
 } from "@/components/ui/combobox";
 
-
 export default function Plan() {
-    const { currentUser } = useAuth()
+  const { currentUser } = useAuth();
 
-    const router = useRouter()
+  const parseDate = (dateString) => {
+    const [y, m, d] = dateString.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  };
 
-    const [page, setPage] = useState(1);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
-    const [limit, setLimit] = useState(50);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalData, setTotalData] = useState(0)
-    const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-    const [search, setSearch] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-    const [data, setData] = useState([])
-    const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
 
-    const [selectedUser, setSelectedUser] = useState("");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+  useEffect(() => {
+    if (currentUser?.role?.role === "kepala cabang") return;
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams({
-                page: String(page),
-                limit: String(limit),
-                search: debouncedSearch,
-            });
-
-            if (selectedUser) {
-                params.append("id_user", selectedUser);
-            }
-
-            if (startDate) {
-                params.append("startDate", startDate);
-            }
-            if (endDate) {
-                params.append("endDate", endDate);
-            }
-
-            const planPromise = fetch(`/api/plan?${params}`);
-
-            const userPromise =
-                currentUser?.role?.role !== "kepala cabang"
-                    ? fetch("/api/user?all=true")
-                    : Promise.resolve(null);
-
-
-            const [planRes, userRes] = await Promise.all([
-                planPromise,
-                userPromise,
-            ]);
-
-            const planData = await planRes.json()
-
-            if (planData.success) {
-                setData(planData.data)
-                setTotalPages(planData.totalPages)
-                setTotalData(planData.totalData)
-            }
-
-            if (userRes) {
-                const userData = await userRes.json();
-
-                if (userData.success) {
-                    setUsers(userData.users);
-                }
-            }
-        } catch (error) {
-            toast.error("failed to fetching data", {
-                description: error.message || "Something went wrong"
-            })
-
-        } finally {
-            setLoading(false);
+    const loadUsers = async () => {
+      try {
+        const res = await fetch("/api/user?all=true");
+        const json = await res.json();
+        if (json.success) {
+          setUsers(json.users || []);
         }
+      } catch (err) {
+        toast.error("Failed to load users", {
+          description: err.message,
+        });
+      }
+    };
+
+    loadUsers();
+  }, [currentUser]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      getPlans(
+        currentMonth.getMonth() + 1,
+        currentMonth.getFullYear(),
+        selectedUser,
+      );
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [currentMonth, selectedUser]);
+
+  useEffect(() => {
+    if (plans.length > 0) {
+      setSelectedDate(parseDate(plans[0].date));
+    } else {
+      setSelectedDate(undefined);
     }
+  }, [plans]);
 
+  const getPlans = async (month, year, userId) => {
+    try {
+      setLoadingPlans(true);
 
-    useEffect(() => {
-        if (search === "" && debouncedSearch === "") return;
-        const handler = setTimeout(() => {
-            setDebouncedSearch(search);
-            setPage(1);
-        }, 500);
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [search]);
+      const params = new URLSearchParams({
+        month: String(month),
+        year: String(year),
+      });
 
-    useEffect(() => {
-        loadData()
-    }, [page, debouncedSearch, limit, selectedUser, startDate, endDate]);
+      if (userId) {
+        params.append("id_user", userId);
+      }
 
+      const res = await fetch(`/api/plan?${params.toString()}`);
+      const json = await res.json();
 
-    const handleNavigateToDetail = (item) => {
-        router.push(`/plan/detail?id=${item.id}`);
+      if (json.success) {
+        setPlans(json.data);
+      } else {
+        setPlans([]);
+      }
+    } catch (err) {
+      toast.error("Failed to fetch data", {
+        description: err.message,
+      });
+    } finally {
+      setLoadingPlans(false);
     }
-    return (
-        <div className="flex flex-col gap-2">
-            <div className="bg-white p-3 rounded-lg  flex flex-col justify-between ">
-                <div className="flex justify-between">
-                    <p className="font-semibold text-stone-600">All Plans</p>
-                    {currentUser.role?.role == "kepala cabang" && (
-                        <Link href="/plan/create"><MyButton label="Create Plan" variant="success"></MyButton></Link>)}
-                </div>
+  };
 
-                <div className="grid grid-cols-1 gap-2 md:grid-cols-4 pt-2">
+  const planDateMap = useMemo(() => {
+    return plans.reduce((acc, item) => {
+      if (!acc[item.date]) {
+        acc[item.date] = [];
+      }
 
-                    <div className="flex flex-col gap-2 text-sm text-stone-500 shrink-0">
-                        <span>Search</span>
-                        <input
-                            type="text"
-                            placeholder="Search plan by title..."
-                            value={search}
-                            onChange={(e) => {
-                                setSearch(e.target.value);
-                                setPage(1);
-                            }}
-                            className="w-full px-2 py-1.5 text-stone-400 text-base rounded-md border border-stone-200 bg-white"
-                        />
-                    </div>
+      acc[item.date].push(item);
 
-                    <div className="flex flex-col gap-2 text-sm text-stone-500">
-                        <span>Show</span>
-                        <select
-                            value={limit}
-                            onChange={(e) => {
-                                setLimit(Number(e.target.value));
-                                setPage(1);
-                            }}
-                            className="w-fit px-2 py-1.5 text-stone-900 text-base rounded-md border border-stone-200 bg-white"
-                        >
-                           
-                            <option value={50}>50 </option>
-                            <option value={100}>100 </option>
-                        </select>
-                    </div>
+      return acc;
+    }, {});
+  }, [plans]);
 
-                    <div className="flex flex-col gap-2 text-sm text-stone-500">
-                        <span>Filter by Date</span>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <div className="">
-                                <label htmlFor="">Start date</label>
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    placeholder="enter start date"
-                                    onChange={(e) => {
-                                        setStartDate(e.target.value);
-                                        setPage(1);
-                                    }}
-                                    onClick={(e) => e.target.showPicker()}
-                                    className="w-full px-2 py-1 text-stone-900 text-base rounded-md border border-stone-200 bg-white"
-                                />
-                            </div>
-                            <div className="">
-                                <label htmlFor="">End Date</label>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    placeholder="enter end date"
-                                    onChange={(e) => {
-                                        setEndDate(e.target.value);
-                                        setPage(1);
-                                    }}
-                                    onClick={(e) => e.target.showPicker()}
-                                    className="w-full px-2 py-1 text-stone-900 text-base rounded-md border border-stone-200 bg-white"
-                                />
+  const selectedDateKey = selectedDate
+    ? new Date(
+        selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000,
+      )
+        .toISOString()
+        .split("T")[0]
+    : "";
+  const plansOnSelectedDate = planDateMap[selectedDateKey] || [];
 
-                            </div>
+  const planDates = useMemo(() => {
+    return Object.keys(planDateMap).map((date) => {
+      const [y, m, d] = date.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    });
+  }, [planDateMap]);
 
-                        </div>
-                    </div>
+  const handleNavigateToDetail = (item) => {
+    router.push(`/plan/detail?id=${item.id}`);
+  };
 
-                    {currentUser.role?.role != "kepala cabang" && (
-                        <div className="flex flex-col gap-2 text-sm text-stone-500">
-                            <span>filter by user</span>
-                            <Combobox
-                                items={users}
-                                value={selectedUser}
-                                onValueChange={(value) => {
-                                    setSelectedUser(value);
-                                    setPage(1);
-                                }}>
-                                <ComboboxInput
-                                    placeholder="Select a user"
-                                    className="bg-white"
-                                    value={
-                                        users.find((u) => String(u.id) === selectedUser)?.name || ""
-                                    }
-                                />
-                                <ComboboxContent>
-                                    <ComboboxEmpty>No user found.</ComboboxEmpty>
-                                    <ComboboxList>
-                                        {(item) => (
-                                            <ComboboxItem key={item.id} value={String(item.id)}>
-                                                {item.name}
-                                            </ComboboxItem>
-                                        )}
-                                    </ComboboxList>
-                                </ComboboxContent>
-                            </Combobox>
-                        </div>
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 relative">
+      <div className="sticky top-14 self-start">
+        <div className="rounded-2xl border border-stone-200 bg-white p-2">
+          <div className="mb-2 p-2 flex justify-between items-center">
+            <div>
+              <h1 className="text-xl font-bold text-stone-800">Plans</h1>
+              <p className="text-sm text-stone-500">
+                Klik tanggal untuk melihat plan yang tersedia.
+              </p>
+            </div>
+            {currentUser.role?.role == "kepala cabang" && (
+              <Link href="/plan/create" className="shrink-0">
+                <MyButton label="Create Plan" variant="success"></MyButton>
+              </Link>
+            )}
+          </div>
+
+          {currentUser.role?.role != "kepala cabang" && (
+            <div className="flex flex-col gap-2 text-sm text-stone-500">
+              <span>filter by user</span>
+              <Combobox
+                items={users}
+                value={selectedUser}
+                onValueChange={(value) => {
+                  setSelectedUser(value);
+                }}>
+                <ComboboxInput
+                  placeholder="Select a user"
+                  className="bg-white"
+                  value={
+                    users.find((u) => String(u.id) === selectedUser)?.name || ""
+                  }
+                />
+                <ComboboxContent>
+                  <ComboboxEmpty>No user found.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(item) => (
+                      <ComboboxItem key={item.id} value={String(item.id)}>
+                        {item.name}
+                      </ComboboxItem>
                     )}
-
-                </div>
-                <div className="text-xs text-stone-400 text-end py-2">Total Plans : <span className="text-stone-900">{totalData}</span> </div>
-
-                {(startDate || endDate || selectedUser) && (
-                    <MyButton
-                        label="clear filter"
-                        variant="netral"
-                        onClick={() => {
-                            setStartDate("");
-                            setEndDate("");
-                            setSelectedUser('')
-                            setPage(1);
-                        }}
-
-                    />
-
-                )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </div>
+          )}
 
-            <div className="block space-y-2">
-                {loading ? (
-                    <div className="flex justify-center items-center h-32 bg-white rounded-lg border border-stone-100">
-                        <Spinner />
-                    </div>
-                ) : data.length === 0 ? (
-                    <div className="h-32 flex justify-center items-center text-sm text-stone-400 bg-white rounded-lg border border-stone-100">
-                        No data found.
-                    </div>
-                ) : (
-                    data.map((item) => (
-                        <div
-                            key={item.id}
-                            onClick={() => handleNavigateToDetail(item)}
-                            className="bg-white p-3.5 rounded-sm active:bg-stone-50 cursor-pointer flex flex-col gap-2 hover:bg-blue-50"
-                        >
-                            <div className="flex justify-between items-start gap-2">
-                                <span className="font-semibold text-stone-900 text-sm line-clamp-2 leading-snug">
-                                    {item.title}
-                                </span>
-                                <span className="text-[11px] font-medium px-2 py-0.5 bg-stone-100 text-stone-500 rounded-full shrink-0">-</span>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-y-2 text-xs pt-2 mt-1 border-t border-stone-100">
-                                <div>
-                                    <span className="block text-[10px] text-stone-400 font-medium tracking-wide">PLAN DATE</span>
-                                    <span className="font-medium text-stone-700">{formatDate(item.date)}</span>
-                                </div>
-                                <div>
-                                    <span className="block text-[10px] text-stone-400 font-medium tracking-wide">BRANCH</span>
-                                    <span className="font-medium text-stone-700">{item.branch?.name || "-"}</span>
-                                </div>
-
-                                <div>
-                                    <span className="block text-[10px] text-stone-400 font-medium tracking-wide">ASSIGNED TO</span>
-                                    <span className="font-medium text-stone-700">{item.user?.name || "-"}</span>
-                                </div>
-                                <div>
-                                    <span className="block text-[10px] text-stone-400 font-medium tracking-wide">Task</span>
-                                    <span className="font-medium text-stone-700">{item.totalItem || 0}/{item.completedItem || 0}</span>
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                )}
+          {selectedUser && (
+            <div className="py-2">
+              <MyButton
+                label="clear filter"
+                variant="netral"
+                onClick={() => {
+                  setSelectedUser("");
+                }}
+              />
             </div>
+          )}
 
-            <div className="">
-                <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-stone-100">
-                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
-
-                        Page <span className="text-stone-800">{page}</span> of <span className="text-stone-800">{totalPages}</span>
-                    </p>
-
-                    <div className="flex items-center gap-1.5">
-                        <MyButton
-                            icon={IconChevronLeft}
-                            iconOnly
-                            variant={page === 1 ? "disable" : "white"}
-                            disabled={page === 1}
-                            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                        />
-                        <MyButton
-                            icon={IconChevronRight}
-                            iconOnly
-                            variant={(page === totalPages || totalPages === 0) ? "disable" : "white"}
-                            disabled={page === totalPages || totalPages === 0}
-                            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-                        />
-                    </div>
-                </div>
-            </div>
+          <div className="rounded-2xl border border-stone-100">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => {
+                if (date) {
+                  setSelectedDate(date);
+                }
+              }}
+              modifiers={{
+                hasPlan: planDates,
+              }}
+              onMonthChange={(month) => {
+                setCurrentMonth(month);
+              }}
+              modifiersClassNames={{
+                hasPlan:
+                  "bg-orange-100 text-orange-700 font-semibold rounded-md",
+              }}
+              classNames={{
+                root: "w-full",
+                month: "w-full",
+                month_grid: "w-full",
+                weekdays: "grid grid-cols-7 gap-1",
+                week: "grid grid-cols-7 gap-1 mt-2",
+              }}
+            />
+          </div>
         </div>
-    )
+      </div>
+
+      <div className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 z-20">
+        <div className="flex justify-between">
+          <p className="text-sm font-semibold text-stone-700">
+            Plan {selectedDate ? formatDate(selectedDate, true) : "-"}
+          </p>
+        </div>
+
+        {loadingPlans ? (
+          <div className="flex justify-center items-center h-72">
+            <Spinner />
+          </div>
+        ) : plansOnSelectedDate.length === 0 ? (
+          <p className="mt-3 text-sm text-stone-500">
+            Tidak ada plan pada tanggal ini.
+          </p>
+        ) : (
+          <div className="mt-3 space-y-2.5">
+            {plansOnSelectedDate.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => handleNavigateToDetail(item)}
+                className="bg-white p-3.5 rounded-sm  border border-stone-600  active:bg-stone-50 cursor-pointer flex flex-col gap-2 hover:bg-blue-50">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="font-semibold text-stone-900 text-sm line-clamp-2 leading-snug">
+                    {item.title}
+                  </span>
+                  <span className="text-[11px] font-medium px-2 py-0.5 bg-stone-100 text-stone-500 rounded-full shrink-0">
+                    -
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-y-2 text-xs pt-2 mt-1 border-t border-stone-100">
+                  <div>
+                    <span className="block text-[10px] text-stone-400 font-medium tracking-wide">
+                      PLAN DATE
+                    </span>
+                    <span className="font-medium text-stone-700">
+                      {formatDate(item.date)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-stone-400 font-medium tracking-wide">
+                      BRANCH
+                    </span>
+                    <span className="font-medium text-stone-700">
+                      {item.branch?.name || "-"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="block text-[10px] text-stone-400 font-medium tracking-wide">
+                      ASSIGNED TO
+                    </span>
+                    <span className="font-medium text-stone-700">
+                      {item.user?.name || "-"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-stone-400 font-medium tracking-wide">
+                      Task
+                    </span>
+                    <span className="font-medium text-stone-700">
+                      {item.totalItem || 0}/{item.completedItem || 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
